@@ -134,6 +134,45 @@ function extractPageData(viewportHeight) {
   };
 }
 
+async function autoScroll(page) {
+  await page.evaluate(async () => {
+    const step = Math.max(200, Math.floor(window.innerHeight * 0.8));
+    let lastHeight = 0;
+    // Cap iterations so an infinite-scroll page can't hang the request forever.
+    for (let i = 0; i < 40; i++) {
+      window.scrollBy(0, step);
+      await new Promise((r) => setTimeout(r, 120));
+      const height = document.documentElement.scrollHeight;
+      const atBottom = window.innerHeight + window.scrollY >= height - 2;
+      if (atBottom && height === lastHeight) break;
+      lastHeight = height;
+    }
+  });
+}
+
+async function waitForImagesAndFonts(page) {
+  const evaluatePromise = page.evaluate(() => {
+    const imagesLoaded = Promise.all(
+      Array.from(document.images)
+        .filter((img) => !img.complete)
+        .map(
+          (img) =>
+            new Promise((resolve) => {
+              img.addEventListener("load", resolve, { once: true });
+              img.addEventListener("error", resolve, { once: true });
+            })
+        )
+    );
+    const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+    return Promise.all([imagesLoaded, fontsReady]);
+  });
+
+  // A single stuck image (blocked request, dead CDN) shouldn't hang the
+  // whole analysis — cap the wait and move on with whatever has loaded.
+  const timeout = new Promise((resolve) => setTimeout(resolve, 6000));
+  await Promise.race([evaluatePromise, timeout]).catch(() => {});
+}
+
 export async function analyzeUrl(rawUrl) {
   const url = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
 
@@ -146,11 +185,22 @@ export async function analyzeUrl(rawUrl) {
     });
     const page = await context.newPage();
 
-    await page.goto(url, { waitUntil: "networkidle", timeout: 30000 }).catch(async () => {
-      // Fall back to a looser wait condition for pages with persistent background activity
+    // "load" is a more reliable completion signal than "networkidle" — plenty
+    // of sites keep a persistent connection alive (chat widgets, analytics,
+    // websockets) and never go idle, which used to make us fall through to
+    // "domcontentloaded" and screenshot a barely-parsed page.
+    await page.goto(url, { waitUntil: "load", timeout: 30000 }).catch(async () => {
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
     });
-    await page.waitForTimeout(500);
+
+    // Many landing pages lazy-load hero/below-the-fold images and fonts only
+    // once they scroll into view (native loading="lazy" or JS/IntersectionObserver
+    // based lazy-loaders). Walk the page top to bottom first so a full-page
+    // screenshot doesn't capture a column of unloaded placeholders.
+    await autoScroll(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await waitForImagesAndFonts(page);
+    await page.waitForTimeout(400); // let CSS transitions/animations settle
 
     const id = randomUUID();
     const fullPath = path.join(SCREENSHOT_DIR, `${id}-full.png`);
