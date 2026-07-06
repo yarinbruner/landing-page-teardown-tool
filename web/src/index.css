@@ -1,0 +1,68 @@
+:root {
+  --paper: #f7f5f0;
+  --paper-dim: #efece3;
+  --ink: #1b1b1e;
+  --ink-soft: #55534c;
+  --line: #dedacd;
+  --red: #b8272d;
+  --green: #2f6e4e;
+  --amber: #a8721f;
+
+  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, ui-serif, serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Subtle paper texture via layered gradients — no external assets */
+.paper-texture {
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(0, 0, 0, 0.015) 0%, transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(0, 0, 0, 0.02) 0%, transparent 45%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #171613;
+    --paper-dim: #201f1b;
+    --ink: #ece8de;
+    --ink-soft: #a8a495;
+    --line: #38352c;
+    --red: #e0625f;
+    --green: #5fae86;
+    --amber: #d9a44f;
+  }
+}
