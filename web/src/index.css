@@ -53,16 +53,3 @@ button {
     radial-gradient(circle at 20% 10%, rgba(0, 0, 0, 0.015) 0%, transparent 40%),
     radial-gradient(circle at 80% 60%, rgba(0, 0, 0, 0.02) 0%, transparent 45%);
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #171613;
-    --paper-dim: #201f1b;
-    --ink: #ece8de;
-    --ink-soft: #a8a495;
-    --line: #38352c;
-    --red: #e0625f;
-    --green: #5fae86;
-    --amber: #d9a44f;
-  }
-}
