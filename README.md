@@ -48,21 +48,28 @@ Each category is scored 0–100 from a fixed set of weighted checks — see
 Screenshots are written to `server/screenshots/` and served statically —
 clear that folder any time to free disk space.
 
-## Expert teardown (optional, needs an API key)
+## Expert teardown (optional, bring your own Claude API key)
 
 `POST /api/expert-teardown` runs a second, LLM-based teardown alongside the
 rule-based one — it follows the Chain of Thought process in
 `TEARDOWN_EXPERT.md` (Observe → Hypothesize → Find the Conflict → Score,
 applying MECLABS, Fogg, JTBD, and Cialdini) instead of the fixed rubric in
-`scoring.js`. This is the one part of the tool that isn't rule-based: it
-calls the Claude API and requires an `ANTHROPIC_API_KEY` in the server's
-environment.
+`scoring.js`. This is the one part of the tool that isn't rule-based, and the
+one part that costs money to run.
+
+It's bring-your-own-key: in the UI, click "add one" next to "No Claude API
+key added" and paste a key from console.anthropic.com. The key is saved only
+in your browser's `localStorage` and sent to this app's own backend as a
+request header on each expert-teardown call — the server never stores it or
+reads it from its own environment. Every user of a shared deployment pays for
+their own usage.
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
 curl -X POST http://localhost:3001/api/expert-teardown \
-  -H "Content-Type: application/json" -d '{"url":"stripe.com"}'
+  -H "Content-Type: application/json" \
+  -H "x-anthropic-api-key: sk-ant-..." \
+  -d '{"url":"stripe.com"}'
 ```
 
-Without the key set, the endpoint returns a 500 with a message to that
-effect rather than failing the rest of the app.
+Without a key, the endpoint returns a 400 asking for one; an invalid key
+returns a 401 rather than failing the rest of the app.

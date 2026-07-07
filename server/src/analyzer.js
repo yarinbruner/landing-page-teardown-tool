@@ -361,7 +361,13 @@ function extractPageData(viewportHeight) {
     .filter(isVisible)
     .map((el) => ({ text: textOf(el).slice(0, 120), rect: rectOf(el) }));
 
-  const bodyText = document.body.innerText || "";
+  // Some pages run a live, perpetually-incrementing counter (e.g. a "% of
+  // global GDP processed" ticker) that never settles no matter how long you
+  // wait — its precision keeps growing every render. Round any suspiciously
+  // over-precise number down to 1 decimal place so a report describes it as
+  // the stable stat it represents, not a random instantaneous snapshot.
+  const rawBodyText = document.body.innerText || "";
+  const bodyText = rawBodyText.replace(/\b(\d+\.\d{3,})(%?)/g, (_, num, pct) => `${Number(num).toFixed(1)}${pct}`);
 
   return {
     title: document.title,
@@ -417,6 +423,22 @@ async function waitForImagesAndFonts(page) {
   await Promise.race([evaluatePromise, timeout]).catch(() => {});
 }
 
+// Some hero sections run a JS count-up animation on stats (e.g. "X% of
+// global GDP") for a few seconds after load. Without this, a screenshot or
+// text extraction can land mid-count and capture a meaningless transient
+// value instead of the final number. Poll body text until two consecutive
+// reads match, capped so a page with genuinely-live content (a clock, a
+// ticker) can't hang the request.
+async function waitForTextToStabilize(page, { interval = 300, attempts = 6 } = {}) {
+  let previous = null;
+  for (let i = 0; i < attempts; i++) {
+    const current = await page.evaluate(() => document.body.innerText);
+    if (current === previous) return;
+    previous = current;
+    await page.waitForTimeout(interval);
+  }
+}
+
 export async function analyzeUrl(rawUrl) {
   const url = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
 
@@ -449,6 +471,7 @@ export async function analyzeUrl(rawUrl) {
     await page.evaluate(() => window.scrollTo(0, 0));
     await waitForImagesAndFonts(page);
     await page.waitForTimeout(400); // let CSS transitions/animations settle
+    await waitForTextToStabilize(page);
 
     // Hide cookie banners, generic popups/modals, and accessibility-widget
     // chrome before capturing anything — otherwise they end up in the

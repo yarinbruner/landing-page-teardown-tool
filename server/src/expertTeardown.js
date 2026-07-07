@@ -1,11 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import fs from "node:fs";
 import path from "node:path";
+import sharp from "sharp";
 
 const TEARDOWN_EXPERT_PATH = path.resolve(process.cwd(), "..", "TEARDOWN_EXPERT.md");
 const SCREENSHOT_DIR = path.resolve(process.cwd(), "screenshots");
-
-const client = new Anthropic();
 
 const ELEMENT_KEYS = ["headline", "cta", "trust", "friction", "messageMarketFit"];
 
@@ -109,9 +108,15 @@ const TEARDOWN_TOOL = {
   },
 };
 
-function imageBlock(filename) {
-  const data = fs.readFileSync(path.join(SCREENSHOT_DIR, filename)).toString("base64");
-  return { type: "image", source: { type: "base64", media_type: "image/png", data } };
+const MAX_IMAGE_EDGE = 1568;
+
+async function imageBlock(filename) {
+  const raw = fs.readFileSync(path.join(SCREENSHOT_DIR, filename));
+  const resized = await sharp(raw)
+    .resize({ width: MAX_IMAGE_EDGE, height: MAX_IMAGE_EDGE, fit: "inside", withoutEnlargement: true })
+    .png()
+    .toBuffer();
+  return { type: "image", source: { type: "base64", media_type: "image/png", data: resized.toString("base64") } };
 }
 
 function summarizePageData(pageData) {
@@ -129,9 +134,14 @@ function summarizePageData(pageData) {
   ].join("\n\n");
 }
 
-export async function runExpertTeardown(pageData) {
+export async function runExpertTeardown(pageData, apiKey) {
   const system = fs.readFileSync(TEARDOWN_EXPERT_PATH, "utf8");
   const summary = summarizePageData(pageData);
+  const client = new Anthropic({ apiKey });
+  const [aboveFoldImage, fullImage] = await Promise.all([
+    imageBlock(pageData.screenshots.aboveFold),
+    imageBlock(pageData.screenshots.full),
+  ]);
 
   const response = await client.messages.create({
     model: "claude-sonnet-5",
@@ -147,8 +157,8 @@ export async function runExpertTeardown(pageData) {
       {
         role: "user",
         content: [
-          imageBlock(pageData.screenshots.aboveFold),
-          imageBlock(pageData.screenshots.full),
+          aboveFoldImage,
+          fullImage,
           {
             type: "text",
             text: `Above: the above-the-fold screenshot, then the full-page screenshot. Extracted DOM data follows.\n\n${summary}\n\nRun the full Chain of Thought teardown now.`,

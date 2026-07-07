@@ -1,9 +1,12 @@
 import express from "express";
 import cors from "cors";
 import path from "node:path";
+import dotenv from "dotenv";
 import { analyzeUrl } from "./analyzer.js";
 import { scorePage } from "./scoring.js";
 import { runExpertTeardown } from "./expertTeardown.js";
+
+dotenv.config({ path: path.resolve(process.cwd(), "..", ".claude", ".env") });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -51,13 +54,14 @@ app.post("/api/expert-teardown", async (req, res) => {
   if (!url || typeof url !== "string" || !url.trim()) {
     return res.status(400).json({ error: "Provide a URL to analyze." });
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: "Set ANTHROPIC_API_KEY to use the expert teardown." });
+  const apiKey = req.get("x-anthropic-api-key") || process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || !apiKey.trim()) {
+    return res.status(400).json({ error: "Add your Claude API key to run the expert teardown." });
   }
 
   try {
     const pageData = await analyzeUrl(url.trim());
-    const teardown = await runExpertTeardown(pageData);
+    const teardown = await runExpertTeardown(pageData, apiKey.trim());
 
     res.json({
       url: pageData.url,
@@ -70,7 +74,13 @@ app.post("/api/expert-teardown", async (req, res) => {
       teardown,
     });
   } catch (err) {
-    console.error("Expert teardown failed:", err);
+    console.error("Expert teardown failed:", err.message);
+    if (err.status === 401) {
+      return res.status(401).json({ error: "That Claude API key was rejected. Check it and try again." });
+    }
+    if (err.status === 429) {
+      return res.status(429).json({ error: "Claude API rate limit or credit balance hit. Check your account at console.anthropic.com." });
+    }
     const message =
       err.name === "TimeoutError"
         ? "The page took too long to load. Check the URL and try again."
