@@ -27,7 +27,10 @@ export function applyScoring(teardown) {
   const criterionMeans = [];
 
   for (const key of CRITERIA_KEYS) {
-    const c = teardown.criteria[key];
+    const c = teardown.criteria?.[key];
+    if (!c || !Array.isArray(c.findings) || c.findings.length === 0) {
+      throw new Error(`Model response is missing findings for criterion "${key}".`);
+    }
     const ratings = c.findings.map((f) => f.rating);
     const mean = positiveWeightedMean(ratings); // 1-5
     criterionMeans.push(mean);

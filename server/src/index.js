@@ -22,7 +22,7 @@ const DEFAULT_MODEL = { anthropic: "claude-sonnet-5", openai: "gpt-5.5" };
 
 app.post("/api/expert-teardown", async (req, res) => {
   const { url, mock, provider: rawProvider, model: rawModel } = req.body || {};
-  const provider = rawProvider === "openai" ? "openai" : "anthropic";
+  const provider = typeof rawProvider === "string" && rawProvider.toLowerCase() === "openai" ? "openai" : "anthropic";
   const model = rawModel || DEFAULT_MODEL[provider];
   if (!url || typeof url !== "string" || !url.trim()) {
     return res.status(400).json({ error: "Provide a URL to analyze." });
