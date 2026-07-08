@@ -9,7 +9,7 @@ own Claude API key; there's no free rule-based mode.
 ## Quickstart
 
 ```bash
-git clone <this-repo-url>
+git clone https://github.com/yarinbruner/landing-page-teardown-tool.git
 cd landing-page-teardown-tool
 npm run setup   # installs both server + web deps, and Playwright's Chromium
 npm run dev     # runs both dev servers together
