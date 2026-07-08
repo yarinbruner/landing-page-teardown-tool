@@ -4,6 +4,7 @@ import path from "node:path";
 import dotenv from "dotenv";
 import { analyzeUrl } from "./analyzer.js";
 import { runExpertTeardown } from "./expertTeardown.js";
+import { runOpenAiTeardown } from "./openaiTeardown.js";
 import { buildMockTeardown } from "./mockTeardown.js";
 import { applyScoring } from "./scoreAggregation.js";
 
@@ -17,8 +18,12 @@ app.use(cors());
 app.use(express.json());
 app.use("/screenshots", express.static(SCREENSHOT_DIR));
 
+const DEFAULT_MODEL = { anthropic: "claude-sonnet-5", openai: "gpt-5.5" };
+
 app.post("/api/expert-teardown", async (req, res) => {
-  const { url, mock } = req.body || {};
+  const { url, mock, provider: rawProvider, model: rawModel } = req.body || {};
+  const provider = rawProvider === "openai" ? "openai" : "anthropic";
+  const model = rawModel || DEFAULT_MODEL[provider];
   if (!url || typeof url !== "string" || !url.trim()) {
     return res.status(400).json({ error: "Provide a URL to analyze." });
   }
@@ -39,6 +44,8 @@ app.post("/api/expert-teardown", async (req, res) => {
         },
         teardown: applyScoring(buildMockTeardown(pageData)),
         mock: true,
+        provider,
+        model,
       });
     } catch (err) {
       console.error("Mock teardown failed:", err);
@@ -50,14 +57,19 @@ app.post("/api/expert-teardown", async (req, res) => {
     }
   }
 
-  const apiKey = req.get("x-anthropic-api-key") || process.env.ANTHROPIC_API_KEY;
+  const isOpenAi = provider === "openai";
+  const envFallback = isOpenAi ? process.env.OPENAI_API_KEY : process.env.ANTHROPIC_API_KEY;
+  const apiKey = req.get(isOpenAi ? "x-openai-api-key" : "x-anthropic-api-key") || envFallback;
   if (!apiKey || !apiKey.trim()) {
-    return res.status(400).json({ error: "Add your Claude API key to run the expert teardown." });
+    return res.status(400).json({ error: `Add your ${isOpenAi ? "OpenAI" : "Claude"} API key to run the expert teardown.` });
   }
 
   try {
     const pageData = await analyzeUrl(url.trim());
-    const teardown = applyScoring(await runExpertTeardown(pageData, apiKey.trim()));
+    const rawTeardown = isOpenAi
+      ? await runOpenAiTeardown(pageData, apiKey.trim(), model)
+      : await runExpertTeardown(pageData, apiKey.trim(), model);
+    const teardown = applyScoring(rawTeardown);
 
     res.json({
       url: pageData.url,
@@ -68,14 +80,18 @@ app.post("/api/expert-teardown", async (req, res) => {
         aboveFold: `/screenshots/${pageData.screenshots.aboveFold}`,
       },
       teardown,
+      provider,
+      model,
     });
   } catch (err) {
     console.error("Expert teardown failed:", err.message);
     if (err.status === 401) {
-      return res.status(401).json({ error: "That Claude API key was rejected. Check it and try again." });
+      return res.status(401).json({ error: `That ${isOpenAi ? "OpenAI" : "Claude"} API key was rejected. Check it and try again.` });
     }
     if (err.status === 429) {
-      return res.status(429).json({ error: "Claude API rate limit or credit balance hit. Check your account at console.anthropic.com." });
+      return res
+        .status(429)
+        .json({ error: `${isOpenAi ? "OpenAI" : "Claude"} API rate limit or credit balance hit. Check your account at ${isOpenAi ? "platform.openai.com" : "console.anthropic.com"}.` });
     }
     const message =
       err.name === "TimeoutError"

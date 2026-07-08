@@ -36,7 +36,7 @@ function RatingPips({ value }) {
   );
 }
 
-export default function CriteriaReport({ teardown }) {
+export default function CriteriaReport({ teardown, providerLabel = "Claude" }) {
   const { criteria, overall, overallVerdict, highestLeverageFix } = teardown;
 
   const weakestFirst = [...CRITERIA_ORDER].sort(
@@ -50,7 +50,7 @@ export default function CriteriaReport({ teardown }) {
       <header className="criteria-head panel">
         <ScoreStamp score={overall} max={10} size="lg" />
         <div className="criteria-head-meta">
-          <div className="criteria-eyebrow">Expert teardown — Claude, industry-standard CoT</div>
+          <div className="criteria-eyebrow">Expert teardown — {providerLabel}, industry-standard CoT</div>
           <p className="criteria-overall-verdict">{overallVerdict}</p>
         </div>
       </header>

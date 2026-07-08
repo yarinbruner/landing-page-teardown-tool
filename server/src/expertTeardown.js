@@ -2,37 +2,11 @@ import Anthropic from "@anthropic-ai/sdk";
 import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
+import { CRITERIA } from "./teardownSchema.js";
+import { summarizePageData } from "./pageSummary.js";
 
 const TEARDOWN_EXPERT_PATH = path.resolve(process.cwd(), "..", "TEARDOWN_EXPERT.md");
 const SCREENSHOT_DIR = path.resolve(process.cwd(), "screenshots");
-
-const CRITERIA = [
-  {
-    key: "messageAndValueProp",
-    label: "Message & Value Prop",
-    description: "Is the exchange (what you get, why it matters) obvious in 5 seconds?",
-  },
-  {
-    key: "callToAction",
-    label: "Call to Action",
-    description: "Is there one clear next step, easy to find, easy to take?",
-  },
-  {
-    key: "trustAndCredibility",
-    label: "Trust & Credibility",
-    description: "Does the page resolve the visitor's doubt?",
-  },
-  {
-    key: "frictionAndClarity",
-    label: "Friction & Clarity",
-    description: "How much effort or confusion stands between arrival and action?",
-  },
-  {
-    key: "urgencyAndMotivation",
-    label: "Urgency & Motivation",
-    description: "Is there a real reason to act now rather than later?",
-  },
-];
 
 const FINDING_SCHEMA = {
   type: "object",
@@ -143,31 +117,7 @@ async function imageBlock(filename) {
   return { type: "image", source: { type: "base64", media_type: "image/png", data: resized.toString("base64") } };
 }
 
-function summarizePageData(pageData) {
-  const headings = pageData.headings.map((h) => `${h.tag}: "${h.text}" (${h.fontSize}px)`).join("\n");
-  const ctas = pageData.ctas
-    .map((c) => {
-      const contrast = c.contrastRatio == null ? "" : ` — contrast ${c.contrastRatio}:1${c.passesWcagAA ? "" : " (fails WCAG AA)"}`;
-      return `"${c.text}" (${c.tag}${c.inNavChrome ? ", nav" : ""}${contrast})`;
-    })
-    .join("\n");
-  const ratings = pageData.ratingElements.map((r) => r.text).join("\n");
-  const forms = (pageData.forms || [])
-    .map((f) => `${f.fieldCount} field${f.fieldCount === 1 ? "" : "s"}${f.aboveFold ? ", above the fold" : ""}${f.submitText ? `, submit: "${f.submitText}"` : ""}`)
-    .join("\n");
-  return [
-    `Title: ${pageData.title}`,
-    `Meta description: ${pageData.metaDescription}`,
-    `Headings:\n${headings || "(none)"}`,
-    `CTAs (${pageData.ctas.length} total):\n${ctas || "(none)"}`,
-    `Images: ${pageData.images.length} total`,
-    `Rating/testimonial elements:\n${ratings || "(none)"}`,
-    `Forms:\n${forms || "(none)"}`,
-    `Body text (first 4000 chars):\n${pageData.bodyText.slice(0, 4000)}`,
-  ].join("\n\n");
-}
-
-export async function runExpertTeardown(pageData, apiKey) {
+export async function runExpertTeardown(pageData, apiKey, model = "claude-sonnet-5") {
   const system = fs.readFileSync(TEARDOWN_EXPERT_PATH, "utf8");
   const summary = summarizePageData(pageData);
   const client = new Anthropic({ apiKey });
@@ -177,7 +127,7 @@ export async function runExpertTeardown(pageData, apiKey) {
   ]);
 
   const response = await client.messages.create({
-    model: "claude-sonnet-5",
+    model,
     max_tokens: 16000,
     // Forced tool_choice below requires thinking off; effort keeps the
     // reasoning depth this multi-model analysis needs without it.

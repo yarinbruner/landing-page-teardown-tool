@@ -5,8 +5,36 @@ import LoadingTips from "./components/LoadingTips.jsx";
 import "./App.css";
 
 const EXAMPLES = ["stripe.com", "linear.app", "notion.com"];
-const API_KEY_STORAGE_KEY = "teardown:anthropicApiKey";
 const TEST_MODE_STORAGE_KEY = "teardown:testMode";
+const PROVIDER_STORAGE_KEY = "teardown:provider";
+const MODEL_STORAGE_KEY_PREFIX = "teardown:model:";
+
+const PROVIDERS = {
+  anthropic: {
+    label: "Claude",
+    keyStorageKey: "teardown:anthropicApiKey",
+    keyHeader: "x-anthropic-api-key",
+    keyPlaceholder: "sk-ant-…",
+    keyHelp: "console.anthropic.com",
+    models: [
+      { value: "claude-sonnet-5", label: "Claude Sonnet 5 (recommended)" },
+      { value: "claude-opus-4-8", label: "Claude Opus 4.8 (most capable)" },
+      { value: "claude-haiku-4-5", label: "Claude Haiku 4.5 (fastest, cheapest)" },
+    ],
+  },
+  openai: {
+    label: "OpenAI",
+    keyStorageKey: "teardown:openaiApiKey",
+    keyHeader: "x-openai-api-key",
+    keyPlaceholder: "sk-…",
+    keyHelp: "platform.openai.com",
+    models: [
+      { value: "gpt-5.5", label: "GPT-5.5 (recommended)" },
+      { value: "gpt-5.4", label: "GPT-5.4 (cheaper)" },
+      { value: "gpt-5.4-mini", label: "GPT-5.4 Mini (fastest, cheapest)" },
+    ],
+  },
+};
 
 export default function App() {
   const [input, setInput] = useState("");
@@ -14,21 +42,45 @@ export default function App() {
   const [teardownError, setTeardownError] = useState(null);
   const [teardownResult, setTeardownResult] = useState(null);
 
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem(API_KEY_STORAGE_KEY) || "");
+  const [provider, setProviderState] = useState(() => {
+    const stored = localStorage.getItem(PROVIDER_STORAGE_KEY);
+    return stored && PROVIDERS[stored] ? stored : "anthropic";
+  });
+  const providerConfig = PROVIDERS[provider];
+
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem(providerConfig.keyStorageKey) || "");
+  const [model, setModelState] = useState(
+    () => localStorage.getItem(MODEL_STORAGE_KEY_PREFIX + provider) || providerConfig.models[0].value
+  );
   const [apiKeyDraft, setApiKeyDraft] = useState("");
   const [editingKey, setEditingKey] = useState(false);
   const [testMode, setTestMode] = useState(() => localStorage.getItem(TEST_MODE_STORAGE_KEY) === "1");
 
+  function selectProvider(next) {
+    if (next === provider) return;
+    setProviderState(next);
+    localStorage.setItem(PROVIDER_STORAGE_KEY, next);
+    setApiKey(localStorage.getItem(PROVIDERS[next].keyStorageKey) || "");
+    setModelState(localStorage.getItem(MODEL_STORAGE_KEY_PREFIX + next) || PROVIDERS[next].models[0].value);
+    setApiKeyDraft("");
+    setEditingKey(false);
+  }
+
+  function selectModel(next) {
+    setModelState(next);
+    localStorage.setItem(MODEL_STORAGE_KEY_PREFIX + provider, next);
+  }
+
   function saveApiKey() {
     const trimmed = apiKeyDraft.trim();
-    localStorage.setItem(API_KEY_STORAGE_KEY, trimmed);
+    localStorage.setItem(providerConfig.keyStorageKey, trimmed);
     setApiKey(trimmed);
     setApiKeyDraft("");
     setEditingKey(false);
   }
 
   function clearApiKey() {
-    localStorage.removeItem(API_KEY_STORAGE_KEY);
+    localStorage.removeItem(providerConfig.keyStorageKey);
     setApiKey("");
   }
 
@@ -54,8 +106,8 @@ export default function App() {
     try {
       const res = await fetch("/api/expert-teardown", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-anthropic-api-key": apiKey },
-        body: JSON.stringify({ url, mock: testMode }),
+        headers: { "Content-Type": "application/json", [providerConfig.keyHeader]: apiKey },
+        body: JSON.stringify({ url, mock: testMode, provider, model }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "Something went wrong.");
@@ -78,10 +130,30 @@ export default function App() {
         <div className="masthead-eyebrow">Landing Page Teardown</div>
         <h1 className="masthead-title">Score the pitch, not just the paint.</h1>
         <p className="masthead-sub">
-          Drop in a URL. Claude runs it through an industry-standard conversion teardown — message &amp; value
-          prop, call to action, trust, friction, and urgency — using your own API key.
+          Drop in a URL. Claude or OpenAI runs it through an industry-standard conversion teardown — message
+          &amp; value prop, call to action, trust, friction, and urgency — using your own API key.
         </p>
       </header>
+
+      <div className="provider-row">
+        {Object.entries(PROVIDERS).map(([key, cfg]) => (
+          <button
+            key={key}
+            type="button"
+            className={`provider-tab ${provider === key ? "provider-tab--active" : ""}`}
+            onClick={() => selectProvider(key)}
+          >
+            {cfg.label}
+          </button>
+        ))}
+        <select className="model-select" value={model} onChange={(e) => selectModel(e.target.value)}>
+          {providerConfig.models.map((m) => (
+            <option key={m.value} value={m.value}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="api-key-row panel">
         {editingKey ? (
@@ -95,7 +167,7 @@ export default function App() {
             <input
               className="api-key-input"
               type="password"
-              placeholder="sk-ant-…"
+              placeholder={providerConfig.keyPlaceholder}
               value={apiKeyDraft}
               onChange={(e) => setApiKeyDraft(e.target.value)}
               autoFocus
@@ -110,7 +182,7 @@ export default function App() {
           </form>
         ) : apiKey ? (
           <span className="api-key-status">
-            Claude API key saved (stays in your browser) ·{" "}
+            {providerConfig.label} API key saved (stays in your browser) ·{" "}
             <button className="api-key-link" type="button" onClick={() => setEditingKey(true)}>
               change
             </button>{" "}
@@ -121,11 +193,11 @@ export default function App() {
           </span>
         ) : (
           <span className="api-key-status">
-            No Claude API key added —{" "}
+            No {providerConfig.label} API key added —{" "}
             <button className="api-key-link" type="button" onClick={() => setEditingKey(true)}>
               add one
             </button>{" "}
-            to run a teardown
+            from {providerConfig.keyHelp} to run a teardown
           </span>
         )}
       </div>
@@ -150,7 +222,7 @@ export default function App() {
           className="url-bar-submit"
           type="submit"
           disabled={(!apiKey && !testMode) || teardownStatus === "loading"}
-          title={apiKey || testMode ? undefined : "Add a Claude API key above, or enable test mode"}
+          title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
         >
           {teardownStatus === "loading" ? "Tearing down…" : "Tear it down →"}
         </button>
@@ -165,7 +237,7 @@ export default function App() {
               type="button"
               className="example-chip"
               disabled={!apiKey && !testMode}
-              title={apiKey || testMode ? undefined : "Add a Claude API key above, or enable test mode"}
+              title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
               onClick={() => {
                 setInput(ex);
                 runTeardown(ex);
@@ -191,12 +263,18 @@ export default function App() {
             {teardownResult.mock && <div className="mock-badge">Mock data — no API call was made</div>}
             <div className="report-head-url">{teardownResult.url}</div>
             <div className="report-head-title">{teardownResult.title}</div>
-            <div className="report-head-date">Analyzed {new Date(teardownResult.analyzedAt).toLocaleString()}</div>
+            <div className="report-head-date">
+              Analyzed {new Date(teardownResult.analyzedAt).toLocaleString()}
+              {teardownResult.provider && ` · ${PROVIDERS[teardownResult.provider]?.label || teardownResult.provider} · ${teardownResult.model}`}
+            </div>
           </div>
 
           <div className="report-grid">
             <ScreenshotPane screenshotUrl={teardownResult.screenshots.full} />
-            <CriteriaReport teardown={teardownResult.teardown} />
+            <CriteriaReport
+              teardown={teardownResult.teardown}
+              providerLabel={PROVIDERS[teardownResult.provider]?.label || "Claude"}
+            />
           </div>
         </div>
       )}
