@@ -1,67 +1,58 @@
 # Landing Page Teardown
 
-Paste a URL, get back a full-page screenshot marked up against conversion
-best practices for headline clarity, call-to-action strength, and trust
-signals. Pure rule-based scoring — no external API, no API key, runs
-entirely on your machine.
+Paste a URL, get back a full-page screenshot and a Claude-powered conversion
+teardown — five criteria (message & value prop, call to action, trust &
+credibility, friction & clarity, urgency & motivation), each with a handful
+of short findings (rated 1-5) and one concrete "change this" fix. Bring your
+own Claude API key; there's no free rule-based mode.
+
+## Quickstart
+
+```bash
+git clone <this-repo-url>
+cd landing-page-teardown-tool
+npm run setup   # installs both server + web deps, and Playwright's Chromium
+npm run dev     # runs both dev servers together
+```
+
+Open http://localhost:5173. Either add your own Claude API key (click "add
+one"), or check "Test mode — mock data, no API cost" to try the UI for free
+with canned data. Enter a URL (e.g. `stripe.com`) and click "Tear it down →".
 
 ## Structure
 
 - `server/` — Node/Express API. Uses Playwright (headless Chromium) to load
-  the page, screenshot it, and extract headline/CTA/trust-signal DOM data;
-  `server/src/scoring.js` grades that data against a fixed rubric.
-- `web/` — Vite/React UI. URL input → annotated screenshot with numbered
-  pins + pass/fail checklists per category.
-
-## Running it
-
-```bash
-# Terminal 1 — API + screenshotting (installs a headless Chromium on first run)
-cd server
-npm install
-npx playwright install chromium
-npm start          # http://localhost:3001
-
-# Terminal 2 — UI
-cd web
-npm install
-npm run dev         # http://localhost:5173
-```
-
-Open http://localhost:5173, enter a URL (e.g. `stripe.com`), click "Tear it
-down →".
-
-## How scoring works
-
-Each category is scored 0–100 from a fixed set of weighted checks — see
-`server/src/scoring.js` for the full rubric:
-
-- **Headline** — single clear H1, scannable length, above the fold,
-  visually prominent, avoids generic phrasing, states a concrete benefit.
-- **Call to action** — exists, above the fold, action-oriented text,
-  contrast ratio, tap-target size, not overloaded with competing CTAs,
-  removes signup friction nearby.
-- **Trust signals** — customer/partner logos, security badges, testimonials
-  or ratings, quantified social proof, guarantee/risk-reversal copy, real
-  contact info.
+  the page, screenshot it, and extract headline/CTA/trust/form DOM data;
+  `server/src/expertTeardown.js` sends that data plus the screenshots to
+  Claude, which runs the Chain of Thought teardown described in
+  `TEARDOWN_EXPERT.md` (Observe → Hypothesize → Find the Conflict → Rate,
+  applying MECLABS, Fogg, JTBD, Cialdini, and a practical conversion
+  playbook as internal reasoning) and returns the five-criteria report.
+  `server/src/scoreAggregation.js` turns Claude's per-finding 1-5 ratings
+  into the section bars and the overall 1-10 score.
+- `web/` — Vite/React UI, dark/monochrome design. URL input → report with
+  the full-page screenshot alongside a tabbed criteria panel (bars, rated
+  findings, one emphasized fix per section).
 
 Screenshots are written to `server/screenshots/` and served statically —
 clear that folder any time to free disk space.
 
-## Expert teardown (optional, bring your own Claude API key)
+## Scoring
 
-`POST /api/expert-teardown` runs a second, LLM-based teardown alongside the
-rule-based one — it follows the Chain of Thought process in
-`TEARDOWN_EXPERT.md` (Observe → Hypothesize → Find the Conflict → Score,
-applying MECLABS, Fogg, JTBD, and Cialdini) instead of the fixed rubric in
-`scoring.js`. This is the one part of the tool that isn't rule-based, and the
-one part that costs money to run.
+Each finding gets a 1-5 rating from Claude (5 = working well, 1 = seriously
+broken). The app computes everything else — it's not a plain average and
+not bottlenecked by the single weakest thing: stronger findings are weighted
+more heavily than weak ones, so a page that's mostly excellent with one real
+gap scores better than an average would suggest, while still surfacing that
+gap as the section's "change this" fix.
+
+## How the teardown works
 
 It's bring-your-own-key: in the UI, click "add one" next to "No Claude API
 key added" and paste a key from console.anthropic.com. The key is saved only
 in your browser's `localStorage` and sent to this app's own backend as a
-request header on each expert-teardown call — the server never stores it or
-reads it from its own environment. Every user of a shared deployment pays for
+request header on each teardown call — the server never stores it or reads
+it from its own environment. Every user of a shared deployment pays for
 their own usage.
 
 ```bash
@@ -71,5 +62,12 @@ curl -X POST http://localhost:3001/api/expert-teardown \
   -d '{"url":"stripe.com"}'
 ```
 
-Without a key, the endpoint returns a 400 asking for one; an invalid key
-returns a 401 rather than failing the rest of the app.
+Without a key (and test mode off), the endpoint returns a 400 asking for
+one; an invalid key returns a 401 rather than failing the rest of the app.
+
+### Test mode (no API key needed)
+
+Check "Test mode — mock data, no API cost" in the UI, or pass `"mock": true`
+in the request body, to run the real screenshot/DOM-extraction pipeline but
+skip the Claude call in favor of canned data — useful for trying out or
+developing the UI without spending API credits.
