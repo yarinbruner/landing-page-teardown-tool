@@ -6,57 +6,87 @@ import sharp from "sharp";
 const TEARDOWN_EXPERT_PATH = path.resolve(process.cwd(), "..", "TEARDOWN_EXPERT.md");
 const SCREENSHOT_DIR = path.resolve(process.cwd(), "screenshots");
 
-const ELEMENT_KEYS = ["headline", "cta", "trust", "friction", "messageMarketFit"];
+const CRITERIA = [
+  {
+    key: "messageAndValueProp",
+    label: "Message & Value Prop",
+    description: "Is the exchange (what you get, why it matters) obvious in 5 seconds?",
+  },
+  {
+    key: "callToAction",
+    label: "Call to Action",
+    description: "Is there one clear next step, easy to find, easy to take?",
+  },
+  {
+    key: "trustAndCredibility",
+    label: "Trust & Credibility",
+    description: "Does the page resolve the visitor's doubt?",
+  },
+  {
+    key: "frictionAndClarity",
+    label: "Friction & Clarity",
+    description: "How much effort or confusion stands between arrival and action?",
+  },
+  {
+    key: "urgencyAndMotivation",
+    label: "Urgency & Motivation",
+    description: "Is there a real reason to act now rather than later?",
+  },
+];
 
-const ELEMENT_SCHEMA = {
+const FINDING_SCHEMA = {
   type: "object",
   properties: {
-    score: { type: "integer" },
-    verdict: { type: "string" },
-    fix: { type: "string" },
+    text: { type: "string", description: "One short, concrete sentence about this page — under ~20 words. Never a restated framework name or generic advice." },
+    rating: { type: "integer", description: "1-5. How strong (5) or weak (1) this specific observation is — 5 means genuinely working well, 1 means seriously broken or missing." },
   },
-  required: ["score", "verdict", "fix"],
+  required: ["text", "rating"],
   additionalProperties: false,
 };
 
-// Mirrors TEARDOWN_EXPERT.md's Chain of Thought exactly: Observe, Hypothesize,
-// Find the Conflict, then Score. Forcing this as a tool schema (rather than
-// free-form text) is what makes "never score before the conflict is named"
-// enforceable — the model can't fill in `score` without first producing
-// `conflict`, since both are required top-level fields it emits together but
-// the schema's ordering/description make the sequence explicit.
+const CRITERION_SCHEMA = {
+  type: "object",
+  properties: {
+    findings: {
+      type: "array",
+      items: FINDING_SCHEMA,
+      description: "Exactly 3-5 short findings, each with its own 1-5 rating.",
+    },
+    whatToChange: {
+      type: "string",
+      description: "The single most important, concrete fix for this criterion. One short sentence, specific to this page.",
+    },
+  },
+  required: ["findings", "whatToChange"],
+  additionalProperties: false,
+};
+
+// Mirrors TEARDOWN_EXPERT.md's Chain of Thought exactly: the model still
+// reasons through Observe, Hypothesize (all four frameworks), Find the
+// Conflict, then Score — but only `criteria`/`overall`/`overallVerdict`/
+// `highestLeverageFix` are meant to reach the user-facing report. Forcing
+// `reasoning` as a required field before `criteria` keeps "never score
+// before the conflict is named" enforceable even though the public output
+// is condensed to five plain-language criteria.
 const TEARDOWN_TOOL = {
   name: "record_expert_teardown",
   description:
-    "Record a landing page teardown that follows the Chain of Thought structure exactly: Observe, Hypothesize, Find the Conflict, then Score. Never populate any field under `score` until `conflict` names where the models disagree.",
+    "Record a landing page teardown. Reason through Observe, Hypothesize (MECLABS/Fogg/JTBD/Cialdini), and Find the Conflict first, then rate five plain-language criteria informed by that reasoning. Never populate `criteria` until `reasoning.conflict` names where the models disagree. Do not compute a holistic numeric score yourself — the app derives section and overall scores from your per-finding 1-5 ratings.",
   strict: true,
   input_schema: {
     type: "object",
     properties: {
-      observe: {
-        type: "string",
-        description: "Layout, copy, structure, and visual hierarchy, described without judgment. No scores or verdicts here.",
-      },
-      hypothesize: {
+      reasoning: {
         type: "object",
+        description: "Internal Chain of Thought. Not shown verbatim in the primary report.",
         properties: {
-          meclabs: { type: "string", description: "MECLABS lens: what m, v, i, f, a reveal — qualitative only, no scores yet." },
-          fogg: { type: "string", description: "Fogg Behavior Model lens: motivation, ability, and prompt." },
-          jtbd: { type: "string", description: "Jobs-To-Be-Done lens: functional, emotional, and social jobs addressed or missing." },
-          cialdini: { type: "string", description: "Cialdini's principles: present, absent, or misused, one by one." },
-        },
-        required: ["meclabs", "fogg", "jtbd", "cialdini"],
-        additionalProperties: false,
-      },
-      conflict: {
-        type: "string",
-        description: "Where the four lenses disagree with each other. This is the diagnosis, not a problem to resolve.",
-      },
-      score: {
-        type: "object",
-        properties: {
+          observe: {
+            type: "string",
+            description: "Layout, copy, structure, and visual hierarchy, described without judgment. No scores or verdicts here.",
+          },
           meclabs: {
             type: "object",
+            description: "MECLABS m/v/i/f/a, scored 1-5 each.",
             properties: {
               m: { type: "integer" },
               v: { type: "integer" },
@@ -68,16 +98,7 @@ const TEARDOWN_TOOL = {
             additionalProperties: false,
           },
           foggBrokenVertex: { type: "string", enum: ["motivation", "ability", "prompt"] },
-          jtbd: {
-            type: "object",
-            properties: {
-              functional: { type: "integer" },
-              emotional: { type: "integer" },
-              social: { type: "integer" },
-            },
-            required: ["functional", "emotional", "social"],
-            additionalProperties: false,
-          },
+          jtbdGap: { type: "string", description: "Which job(s) — functional, emotional, social — the page fails to address." },
           cialdiniAudit: {
             type: "object",
             properties: Object.fromEntries(
@@ -89,21 +110,24 @@ const TEARDOWN_TOOL = {
             required: ["reciprocity", "commitment", "socialProof", "authority", "liking", "scarcity", "unity"],
             additionalProperties: false,
           },
-          elements: {
-            type: "object",
-            properties: Object.fromEntries(ELEMENT_KEYS.map((key) => [key, ELEMENT_SCHEMA])),
-            required: ELEMENT_KEYS,
-            additionalProperties: false,
+          conflict: {
+            type: "string",
+            description: "Where the four models disagree with each other. This is the diagnosis, not a problem to resolve.",
           },
-          overall: { type: "integer", description: "0-100. Bottlenecked by the weakest MECLABS variable — never an average." },
-          overallReasoning: { type: "string" },
-          highestLeverageFix: { type: "string" },
         },
-        required: ["meclabs", "foggBrokenVertex", "jtbd", "cialdiniAudit", "elements", "overall", "overallReasoning", "highestLeverageFix"],
+        required: ["observe", "meclabs", "foggBrokenVertex", "jtbdGap", "cialdiniAudit", "conflict"],
         additionalProperties: false,
       },
+      criteria: {
+        type: "object",
+        properties: Object.fromEntries(CRITERIA.map((c) => [c.key, CRITERION_SCHEMA])),
+        required: CRITERIA.map((c) => c.key),
+        additionalProperties: false,
+      },
+      overallVerdict: { type: "string", description: "One plain-English sentence naming the single biggest lever on this page." },
+      highestLeverageFix: { type: "string", description: "One or two concrete sentences: the single rewrite or structural change that would move the needle most." },
     },
-    required: ["observe", "hypothesize", "conflict", "score"],
+    required: ["reasoning", "criteria", "overallVerdict", "highestLeverageFix"],
     additionalProperties: false,
   },
 };
@@ -121,8 +145,16 @@ async function imageBlock(filename) {
 
 function summarizePageData(pageData) {
   const headings = pageData.headings.map((h) => `${h.tag}: "${h.text}" (${h.fontSize}px)`).join("\n");
-  const ctas = pageData.ctas.map((c) => `"${c.text}" (${c.tag}${c.inNavChrome ? ", nav" : ""})`).join("\n");
+  const ctas = pageData.ctas
+    .map((c) => {
+      const contrast = c.contrastRatio == null ? "" : ` — contrast ${c.contrastRatio}:1${c.passesWcagAA ? "" : " (fails WCAG AA)"}`;
+      return `"${c.text}" (${c.tag}${c.inNavChrome ? ", nav" : ""}${contrast})`;
+    })
+    .join("\n");
   const ratings = pageData.ratingElements.map((r) => r.text).join("\n");
+  const forms = (pageData.forms || [])
+    .map((f) => `${f.fieldCount} field${f.fieldCount === 1 ? "" : "s"}${f.aboveFold ? ", above the fold" : ""}${f.submitText ? `, submit: "${f.submitText}"` : ""}`)
+    .join("\n");
   return [
     `Title: ${pageData.title}`,
     `Meta description: ${pageData.metaDescription}`,
@@ -130,6 +162,7 @@ function summarizePageData(pageData) {
     `CTAs (${pageData.ctas.length} total):\n${ctas || "(none)"}`,
     `Images: ${pageData.images.length} total`,
     `Rating/testimonial elements:\n${ratings || "(none)"}`,
+    `Forms:\n${forms || "(none)"}`,
     `Body text (first 4000 chars):\n${pageData.bodyText.slice(0, 4000)}`,
   ].join("\n\n");
 }

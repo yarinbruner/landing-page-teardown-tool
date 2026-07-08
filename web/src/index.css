@@ -1,15 +1,53 @@
+/* Design system derived from memorisely.com: dark, monochrome, Inter,
+   tight letter-spacing on display type, hairline borders (no blur/glass),
+   small-radius controls, large-radius panels, color reserved for semantic
+   status only. */
 :root {
-  --paper: #f7f5f0;
-  --paper-dim: #efece3;
-  --ink: #1b1b1e;
-  --ink-soft: #55534c;
-  --line: #dedacd;
-  --red: #b8272d;
-  --green: #2f6e4e;
-  --amber: #a8721f;
+  /* Surfaces */
+  --bg: #171717;
+  --surface: #212121;
+  --surface-2: #2a2a2a;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
 
-  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, ui-serif, serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  /* Ink / text */
+  --ink: #ffffff;
+  --ink-soft: rgba(255, 255, 255, 0.65);
+  --ink-faint: rgba(255, 255, 255, 0.4);
+
+  /* Inverted controls (white-on-dark primary action) */
+  --invert-bg: #ffffff;
+  --invert-ink: #171717;
+
+  /* Semantic — the only color in the system, reserved for status */
+  --success: #4ade80;
+  --success-soft: rgba(74, 222, 128, 0.14);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  --danger: #fb7185;
+  --danger-soft: rgba(251, 113, 133, 0.14);
+
+  /* Spacing (4px base) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Radius — small for controls, full for pills/badges, large for panels */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(0, 0, 0, 0.3);
+
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 }
 
@@ -24,10 +62,11 @@ body {
 }
 
 body {
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 #root {
@@ -44,12 +83,21 @@ button {
 
 ::selection {
   background: var(--ink);
-  color: var(--paper);
+  color: var(--bg);
 }
 
-/* Subtle paper texture via layered gradients — no external assets */
-.paper-texture {
-  background-image:
-    radial-gradient(circle at 20% 10%, rgba(0, 0, 0, 0.015) 0%, transparent 40%),
-    radial-gradient(circle at 80% 60%, rgba(0, 0, 0, 0.02) 0%, transparent 45%);
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Flat surface panel — hairline border, no blur, no transparency */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.pill {
+  border-radius: var(--radius-full);
 }

@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import fs from "node:fs";
+import { contrastRatio } from "./colorUtils.js";
 
 const VIEWPORT = { width: 1440, height: 900 };
 const SCREENSHOT_DIR = path.resolve(process.cwd(), "screenshots");
@@ -361,6 +362,23 @@ function extractPageData(viewportHeight) {
     .filter(isVisible)
     .map((el) => ({ text: textOf(el).slice(0, 120), rect: rectOf(el) }));
 
+  // --- Forms (signup/lead-gen friction) ---
+  const FIELD_SELECTOR =
+    "input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]), select, textarea";
+  const forms = Array.from(document.querySelectorAll("form"))
+    .filter(isVisible)
+    .map((form) => {
+      const fields = Array.from(form.querySelectorAll(FIELD_SELECTOR)).filter(isVisible);
+      const submitEl = form.querySelector('button[type=submit], input[type=submit], button:not([type])');
+      const rect = rectOf(form);
+      return {
+        fieldCount: fields.length,
+        aboveFold: rect.y < viewportHeight,
+        submitText: submitEl ? textOf(submitEl).slice(0, 60) : null,
+        rect,
+      };
+    });
+
   // Some pages run a live, perpetually-incrementing counter (e.g. a "% of
   // global GDP processed" ticker) that never settles no matter how long you
   // wait — its precision keeps growing every render. Round any suspiciously
@@ -378,6 +396,7 @@ function extractPageData(viewportHeight) {
     ctas,
     images,
     ratingElements,
+    forms,
     bodyText: bodyText.slice(0, 20000),
     viewportHeight,
     pageHeight: document.documentElement.scrollHeight,
@@ -490,6 +509,21 @@ export async function analyzeUrl(rawUrl) {
     await page.screenshot({ path: fullPath, fullPage: true });
 
     const data = await page.evaluate(extractPageData, VIEWPORT.height);
+
+    // Contrast math needs real Node number precision (Math.pow/gamma curve),
+    // not worth re-deriving inside the page context — compute it here on the
+    // color strings the browser already extracted, so the LLM gets a fact
+    // ("2.1:1, fails WCAG AA") instead of eyeballing contrast from a screenshot.
+    data.ctas = data.ctas.map((c) => {
+      const ratio = contrastRatio(c.color, c.backgroundColor);
+      return {
+        ...c,
+        contrastRatio: ratio === null ? null : Math.round(ratio * 10) / 10,
+        // Large-text WCAG threshold is 18pt (~24px) normal weight or 14pt bold;
+        // font-weight isn't extracted per CTA, so only the unambiguous 24px case is used.
+        passesWcagAA: ratio === null ? null : ratio >= 4.5 || (ratio >= 3 && c.fontSize >= 24),
+      };
+    });
 
     await context.close();
 

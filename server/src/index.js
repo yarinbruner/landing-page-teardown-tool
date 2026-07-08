@@ -3,8 +3,9 @@ import cors from "cors";
 import path from "node:path";
 import dotenv from "dotenv";
 import { analyzeUrl } from "./analyzer.js";
-import { scorePage } from "./scoring.js";
 import { runExpertTeardown } from "./expertTeardown.js";
+import { buildMockTeardown } from "./mockTeardown.js";
+import { applyScoring } from "./scoreAggregation.js";
 
 dotenv.config({ path: path.resolve(process.cwd(), "..", ".claude", ".env") });
 
@@ -16,44 +17,39 @@ app.use(cors());
 app.use(express.json());
 app.use("/screenshots", express.static(SCREENSHOT_DIR));
 
-app.post("/api/analyze", async (req, res) => {
-  const { url } = req.body || {};
-  if (!url || typeof url !== "string" || !url.trim()) {
-    return res.status(400).json({ error: "Provide a URL to analyze." });
-  }
-
-  try {
-    const pageData = await analyzeUrl(url.trim());
-    const scoring = scorePage(pageData);
-
-    res.json({
-      url: pageData.url,
-      analyzedAt: new Date().toISOString(),
-      viewport: pageData.viewport,
-      pageHeight: pageData.pageHeight,
-      title: pageData.title,
-      screenshots: {
-        full: `/screenshots/${pageData.screenshots.full}`,
-        aboveFold: `/screenshots/${pageData.screenshots.aboveFold}`,
-      },
-      overallScore: scoring.overallScore,
-      categories: scoring.categories,
-    });
-  } catch (err) {
-    console.error("Analyze failed:", err);
-    const message =
-      err.name === "TimeoutError"
-        ? "The page took too long to load. Check the URL and try again."
-        : "Could not load or analyze that URL.";
-    res.status(502).json({ error: message });
-  }
-});
-
 app.post("/api/expert-teardown", async (req, res) => {
-  const { url } = req.body || {};
+  const { url, mock } = req.body || {};
   if (!url || typeof url !== "string" || !url.trim()) {
     return res.status(400).json({ error: "Provide a URL to analyze." });
   }
+
+  // Test mode: real Playwright screenshot/DOM extraction (free, local) but a
+  // canned teardown instead of a real Anthropic call — lets UI/design changes
+  // get exercised end-to-end without spending API credits.
+  if (mock === true) {
+    try {
+      const pageData = await analyzeUrl(url.trim());
+      return res.json({
+        url: pageData.url,
+        analyzedAt: new Date().toISOString(),
+        title: pageData.title,
+        screenshots: {
+          full: `/screenshots/${pageData.screenshots.full}`,
+          aboveFold: `/screenshots/${pageData.screenshots.aboveFold}`,
+        },
+        teardown: applyScoring(buildMockTeardown(pageData)),
+        mock: true,
+      });
+    } catch (err) {
+      console.error("Mock teardown failed:", err);
+      const message =
+        err.name === "TimeoutError"
+          ? "The page took too long to load. Check the URL and try again."
+          : "Could not load or analyze that URL.";
+      return res.status(502).json({ error: message });
+    }
+  }
+
   const apiKey = req.get("x-anthropic-api-key") || process.env.ANTHROPIC_API_KEY;
   if (!apiKey || !apiKey.trim()) {
     return res.status(400).json({ error: "Add your Claude API key to run the expert teardown." });
@@ -61,7 +57,7 @@ app.post("/api/expert-teardown", async (req, res) => {
 
   try {
     const pageData = await analyzeUrl(url.trim());
-    const teardown = await runExpertTeardown(pageData, apiKey.trim());
+    const teardown = applyScoring(await runExpertTeardown(pageData, apiKey.trim()));
 
     res.json({
       url: pageData.url,
