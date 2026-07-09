@@ -144,7 +144,7 @@ export default function App() {
   return (
     <div className="page">
       {showReport ? (
-        <div className="screen" key="report">
+        <div className="screen screen--report" key="report">
           <button type="button" className="back-button" onClick={backToInput}>
             ← New teardown
           </button>

@@ -88,9 +88,12 @@ html,
 body {
   margin: 0;
   padding: 0;
-  /* Defensive: no single decorative element (glow, wide panel, etc.) should
-     ever be able to create a page-level horizontal scrollbar. */
-  overflow-x: hidden;
+  height: 100%;
+  /* Hard, absolute lock — the page itself can never scroll, in either
+     direction, no matter what any descendant does. Every screen below is
+     built to fit within one viewport; this is the backstop that makes
+     "no scroll" true even if some future content doesn't fit perfectly. */
+  overflow: hidden;
 }
 
 body {
@@ -98,11 +101,11 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
 }
 
 #root {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   justify-content: center;
 }

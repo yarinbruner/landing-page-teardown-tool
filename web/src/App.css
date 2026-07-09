@@ -1,8 +1,10 @@
 .page {
   max-width: 960px;
+  width: 100%;
   margin: 0 auto;
   padding: var(--space-5);
-  min-height: 100dvh;
+  height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -12,10 +14,22 @@
 /* Screen transitions — the input form and the report are two distinct     */
 /* "screens" that swap (not stack/scroll). Each mount gets a short fade +  */
 /* rise so the swap reads as a deliberate transition, not a jump cut.      */
+/* Input screen sizes to its (deliberately short, vh-clamped) content and  */
+/* sits centered in .page; report screen fills .page exactly and manages  */
+/* its own internal fit — see the report-grid rules below.                */
 /* ---------------------------------------------------------------------- */
 
 .screen {
+  width: 100%;
   animation: screen-in 0.4s var(--ease-spring) both;
+}
+
+.screen--report {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 @keyframes screen-in {
@@ -35,12 +49,13 @@
   gap: var(--space-1);
   background: none;
   border: none;
-  padding: var(--space-2) 0;
-  margin-bottom: var(--space-4);
+  padding: var(--space-1) 0;
+  margin-bottom: var(--space-2);
   color: var(--ink-soft);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  flex-shrink: 0;
   transition: color 0.15s ease, transform 0.3s var(--ease-spring);
 }
 
@@ -59,7 +74,9 @@
 
 .masthead {
   text-align: center;
-  margin-bottom: var(--space-7);
+  /* vh-based, not a fixed token — shrinks smoothly on short viewports
+     instead of relying on a single breakpoint to catch the extreme case. */
+  margin-bottom: clamp(16px, 5vh, 48px);
 }
 
 .masthead-eyebrow {
@@ -67,16 +84,18 @@
   letter-spacing: 0.02em;
   color: var(--ink-soft);
   font-weight: 500;
-  margin-bottom: var(--space-4);
+  margin-bottom: clamp(8px, 2vh, 16px);
 }
 
 .masthead-title {
   font-family: var(--font-display);
-  font-size: clamp(56px, 9vw, 128px);
+  /* min() of vw and vh so it shrinks on EITHER a short OR a narrow
+     viewport, not just a narrow one. */
+  font-size: clamp(40px, min(9vw, 11vh), 128px);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.02;
-  margin: 0 0 var(--space-4);
+  margin: 0 0 clamp(8px, 2vh, 16px);
   text-wrap: balance;
   color: var(--ink);
 }
@@ -92,15 +111,6 @@
 /* Short/split-screen windows: fall back to a much more compact rhythm so
    the input screen still fits without scrolling instead of just clipping
    the huge headline against the URL bar. */
-@media (max-height: 600px) {
-  .masthead {
-    margin-bottom: var(--space-4);
-  }
-  .settings-row {
-    margin-bottom: var(--space-3);
-  }
-}
-
 /* ---------------------------------------------------------------------- */
 /* Settings row — model picker, API key, and test mode: three compact      */
 /* controls on one quiet line so the URL bar below stays the clear lead.   */
@@ -113,7 +123,7 @@
   gap: var(--space-3);
   flex-wrap: wrap;
   max-width: 640px;
-  margin: 0 auto var(--space-4);
+  margin: 0 auto clamp(8px, 2vh, 16px);
 }
 
 /* Model picker — one pill, one popover with provider + model together --- */
@@ -420,7 +430,7 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
-  margin: 0 auto var(--space-4);
+  margin: 0 auto clamp(8px, 2vh, 16px);
   max-width: 640px;
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -732,8 +742,9 @@
 /* ---------------------------------------------------------------------- */
 
 .report-head {
-  padding: var(--space-4) var(--space-5);
-  margin-bottom: var(--space-5);
+  padding: var(--space-3) var(--space-5);
+  margin-bottom: var(--space-3);
+  flex-shrink: 0;
 }
 
 .report-head-url {
@@ -756,17 +767,17 @@
   margin-top: var(--space-1);
 }
 
+/* Side-by-side at every width, deliberately — stacking into one column on
+   narrow viewports would roughly double the content's total height (the
+   screenshot's own height plus the criteria panel's, one after another),
+   which can't fit in one viewport no matter how it's laid out. Narrow
+   side-by-side columns still fit in one screen; a stacked layout wouldn't. */
 .report-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: var(--space-5);
-  align-items: start;
-}
-
-@media (max-width: 800px) {
-  .report-grid {
-    grid-template-columns: 1fr;
-  }
+  gap: var(--space-4);
+  flex: 1;
+  min-height: 0;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -775,12 +786,27 @@
 
 /* The full screenshot renders at its natural height, no internal scroll or
    height cap — it's part of the normal page scroll like everything else. */
+/* The screenshot is often much taller than any viewport at natural size —
+   scale the whole thing down to fit instead of showing it 1:1 (which
+   would force a scroll). object-fit:contain keeps it uncropped, just
+   smaller; height:100% lets it use the full column instead of only its
+   own intrinsic (possibly tiny at this scale) size. */
 .shot-frame {
+  height: 100%;
+  min-height: 0;
   padding: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .shot-frame img {
-  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
   display: block;
   border-radius: var(--radius-md);
   corner-shape: squircle;
@@ -889,14 +915,17 @@
 .criteria-report {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .criteria-head {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   flex-shrink: 0;
 }
 
@@ -918,10 +947,22 @@
 }
 
 .criteria-callout {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   background: var(--accent-soft);
   border-color: var(--accent-strong);
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* On a genuinely short viewport there isn't room to keep every section at
+   full size without crushing the actual finding detail (the most specific,
+   actionable content) down to nothing. The page-level highest-leverage-fix
+   is the most skippable — each criterion's own "change this" box inside
+   the card below still carries actionable guidance on its own. */
+@media (max-height: 700px) {
+  .criteria-callout {
+    display: none;
+  }
 }
 
 .criteria-callout-label {
@@ -975,11 +1016,14 @@
 }
 
 .criterion-card {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
   animation: card-in 0.4s var(--ease-spring) both;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @keyframes card-in {
@@ -1031,13 +1075,24 @@
   transition: width 0.4s var(--ease-spring);
 }
 
+/* The one region allowed to actually run out of room — findings text
+   length is LLM-generated and unbounded, and there is nowhere left to
+   shrink once everything around it is already flex-shrink:0. Clips
+   silently rather than scrolling; on any reasonable finding count/length
+   this fits comfortably, so it's a safety net, not the common case. */
 .criterion-findings {
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  flex: 1;
+  /* Guaranteed a floor even on a very short viewport — the fix box below
+     (flex-shrink:0, but capped at max-height:40% of the card) gives up
+     its room first rather than findings disappearing to 0px entirely. */
+  min-height: 48px;
+  overflow: hidden;
 }
 
 .criterion-findings li {
@@ -1072,12 +1127,14 @@
 }
 
 .criterion-fix {
-  padding: var(--space-4);
+  padding: var(--space-3);
   border-radius: var(--radius-md);
   corner-shape: squircle;
   background: color-mix(in srgb, var(--criterion-color, var(--accent-strong)) 10%, #fff);
   border: 1px solid var(--criterion-color, var(--accent-strong));
   flex-shrink: 0;
+  overflow: hidden;
+  max-height: 40%;
 }
 
 .criterion-fix-label {
