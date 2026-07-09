@@ -1,7 +1,6 @@
 import { useState } from "react";
 import ScreenshotPane from "./components/ScreenshotPane.jsx";
 import ScoreHead from "./components/ScoreHead.jsx";
-import CriteriaTabs from "./components/CriteriaTabs.jsx";
 import CriteriaReport from "./components/CriteriaReport.jsx";
 import LoadingTips from "./components/LoadingTips.jsx";
 import ModelPicker from "./components/ModelPicker.jsx";
@@ -174,10 +173,13 @@ export default function App() {
                 overallVerdict={teardownResult.teardown.overallVerdict}
                 providerLabel={PROVIDERS[teardownResult.provider]?.label || "Claude"}
               />
-              <CriteriaTabs activeKey={activeCriterion} onChange={setActiveCriterion} />
               <ScreenshotPane screenshotUrl={teardownResult.screenshots.full} />
             </div>
-            <CriteriaReport teardown={teardownResult.teardown} activeKey={activeCriterion} />
+            <CriteriaReport
+              teardown={teardownResult.teardown}
+              activeKey={activeCriterion}
+              onSelectCriterion={setActiveCriterion}
+            />
           </div>
         </div>
       ) : (

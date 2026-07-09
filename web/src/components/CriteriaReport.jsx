@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { CRITERIA_COLORS, CRITERIA_LABELS } from "../criteriaMeta.js";
+import CriteriaTabs from "./CriteriaTabs.jsx";
 
 function ScoreBar({ percent }) {
   // Uses the criterion's own color (inherited via --criterion-color from
@@ -25,19 +26,20 @@ function RatingPips({ value }) {
 
 // The findings list is the one region allowed to run out of room (LLM
 // finding count/length is unbounded). Instead of always silently clipping,
-// detect the clip and offer an explicit "show more" toggle — expanding
-// switches the list from clip-hidden to its own internal scroll, the same
-// exception already granted to the screenshot pane, but opt-in per card.
-function Findings({ findings }) {
-  const [expanded, setExpanded] = useState(false);
+// detect the clip and offer an explicit "show more" toggle. Expanding
+// doesn't just flip on an easy-to-miss internal scrollbar within the same
+// box size — it hands the whole card its own scroll (see
+// .criterion-card--scrollable) so the extra content visibly grows into
+// view, the same exception already granted to the screenshot pane.
+function Findings({ findings, expanded, onToggleExpanded }) {
   const [overflowing, setOverflowing] = useState(false);
   const listRef = useRef(null);
 
   useEffect(() => {
     const el = listRef.current;
-    if (!el) return;
+    if (!el || expanded) return;
     setOverflowing(el.scrollHeight > el.clientHeight + 1);
-  }, [findings]);
+  }, [findings, expanded]);
 
   return (
     <div className="criterion-findings-wrap">
@@ -50,12 +52,7 @@ function Findings({ findings }) {
         ))}
       </ul>
       {(overflowing || expanded) && (
-        <button
-          type="button"
-          className="criterion-findings-toggle"
-          onClick={() => setExpanded((v) => !v)}
-          aria-expanded={expanded}
-        >
+        <button type="button" className="criterion-findings-toggle" onClick={onToggleExpanded} aria-expanded={expanded}>
           {expanded ? "Show less" : "Show more"}
           <span className={`chevron ${expanded ? "chevron--up" : ""}`} aria-hidden="true">
             ⌄
@@ -66,12 +63,20 @@ function Findings({ findings }) {
   );
 }
 
-export default function CriteriaReport({ teardown, activeKey }) {
+export default function CriteriaReport({ teardown, activeKey, onSelectCriterion }) {
   const { criteria, highestLeverageFix } = teardown;
   const active = criteria[activeKey];
+  const [findingsExpanded, setFindingsExpanded] = useState(false);
+
+  function selectCriterion(key) {
+    setFindingsExpanded(false);
+    onSelectCriterion(key);
+  }
 
   return (
     <div className="criteria-report">
+      <CriteriaTabs activeKey={activeKey} onChange={selectCriterion} />
+
       <div className="criteria-callout panel">
         <div className="criteria-callout-label">Highest-leverage fix</div>
         <p>{highestLeverageFix}</p>
@@ -80,7 +85,7 @@ export default function CriteriaReport({ teardown, activeKey }) {
       {active && (
         <div
           key={activeKey}
-          className="criterion-card panel"
+          className={`criterion-card panel ${findingsExpanded ? "criterion-card--scrollable" : ""}`}
           style={{ "--criterion-color": CRITERIA_COLORS[activeKey] }}
         >
           <header className="criterion-card-head">
@@ -89,7 +94,11 @@ export default function CriteriaReport({ teardown, activeKey }) {
           </header>
           <ScoreBar percent={active.barPercent} />
 
-          <Findings findings={active.findings} />
+          <Findings
+            findings={active.findings}
+            expanded={findingsExpanded}
+            onToggleExpanded={() => setFindingsExpanded((v) => !v)}
+          />
 
           <div className="criterion-fix">
             <span className="criterion-fix-label">Change this</span>

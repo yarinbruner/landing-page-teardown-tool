@@ -777,8 +777,9 @@
 /* Screenshot pane                                                         */
 /* ---------------------------------------------------------------------- */
 
-/* Score + tab switcher stack above the screenshot as their own fixed-height
-   rows; the screenshot takes whatever's left. */
+/* Score sits in the top half of the left column, screenshot in the
+   bottom half — an even 50/50 split gives the verdict text enough room
+   to read in full instead of being squeezed and clamped. */
 .shot-wrap {
   height: 100%;
   min-height: 0;
@@ -788,11 +789,13 @@
 }
 
 .score-head {
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  gap: var(--space-4);
+  padding: var(--space-4);
 }
 
 .score-head-meta {
@@ -801,16 +804,12 @@
 }
 
 .score-head-meta .criteria-eyebrow {
-  margin-bottom: 2px;
+  margin-bottom: var(--space-2);
 }
 
 .score-head-meta .criteria-overall-verdict {
-  font-size: 13px;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 /* The one deliberate exception to the rest of the app's zero-scroll rule:
@@ -988,21 +987,18 @@
   color: var(--ink);
 }
 
-/* One segmented toggle track living inside the card itself, not a row of
-   separate pills above it — the card's border now wraps both the
-   criterion switcher and its content, and the name is available as a
-   tooltip/aria-label plus, for whichever tab is active, spelled out in the
-   card's own title just below. Sits above the screenshot, alongside the
-   score head, as its own fixed-height row. */
+/* One segmented toggle track, centered at the top of the right column
+   above the highest-leverage-fix callout and the criterion card — the
+   name is available as a tooltip/aria-label plus, for whichever tab is
+   active, spelled out in the card's own title just below. */
 .criteria-tabs {
   display: flex;
-  align-self: flex-start;
+  align-self: center;
   gap: 2px;
   padding: 3px;
   background: var(--surface-2);
   border-radius: var(--radius-full);
   flex-shrink: 0;
-  margin-left: var(--space-1);
 }
 
 .criteria-tab {
@@ -1053,6 +1049,14 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+}
+
+/* Set once "Show more" is clicked (see CriteriaReport) — the findings
+   list drops its own internal clip/scroll and grows to its full natural
+   height, so the whole card scrolls together instead of a tiny,
+   easy-to-miss scrollbar appearing inside an unchanged-looking box. */
+.criterion-card--scrollable {
+  overflow-y: auto;
 }
 
 @keyframes card-in {
@@ -1131,13 +1135,24 @@
   overflow: hidden;
 }
 
+/* Expanded: stop clipping and let the list take its full natural height —
+   .criterion-card--scrollable (set alongside this) is what actually makes
+   the extra content reachable, by letting the whole card scroll. */
 .criterion-findings--expanded {
-  overflow-y: auto;
+  flex: none;
+  overflow: visible;
 }
 
+.criterion-findings-wrap:has(.criterion-findings--expanded) {
+  flex: none;
+}
+
+/* Left-aligned under the findings text, not centered — the findings list
+   itself is visually asymmetric (text column on the left, rating pips on
+   the right), so a centered toggle read as oddly offset. */
 .criterion-findings-toggle {
   flex-shrink: 0;
-  align-self: center;
+  align-self: flex-start;
   display: flex;
   align-items: center;
   gap: 2px;
