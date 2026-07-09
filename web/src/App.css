@@ -987,16 +987,13 @@
   color: var(--ink);
 }
 
-/* One segmented toggle track, living inside the card itself, centered and
-   pinned to the bottom — margin-top:auto pushes it down past whatever
-   findings/fix content precedes it, so it sits at the card's bottom edge
-   whether that content is short or fills the whole card. The name is
-   available as a tooltip/aria-label plus, for whichever tab is active,
-   spelled out in the card's own title above. */
+/* One segmented toggle track, outside the card and below it, at the
+   bottom of the right column — centered, its own fixed-height row. The
+   name is available as a tooltip/aria-label plus, for whichever tab is
+   active, spelled out in the card's own title above. */
 .criteria-tabs {
   display: flex;
   align-self: center;
-  margin-top: auto;
   gap: 2px;
   padding: 3px;
   background: var(--surface-2);

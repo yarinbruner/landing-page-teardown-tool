@@ -102,10 +102,10 @@ export default function CriteriaReport({ teardown, activeKey, onSelectCriterion 
             <span className="criterion-fix-label">Change this</span>
             <p>{active.whatToChange}</p>
           </div>
-
-          <CriteriaTabs activeKey={activeKey} onChange={selectCriterion} />
         </div>
       )}
+
+      <CriteriaTabs activeKey={activeKey} onChange={selectCriterion} />
     </div>
   );
 }
