@@ -149,12 +149,13 @@ export default function App() {
             ← New teardown
           </button>
 
-          <div className="report-head panel">
-            {teardownResult.mock && <div className="mock-badge">Mock data — no API call was made</div>}
-            <div className="report-head-url">{teardownResult.url}</div>
-            <div className="report-head-title">{teardownResult.title}</div>
-            <div className="report-head-date">
-              Analyzed {new Date(teardownResult.analyzedAt).toLocaleString()}
+          <div className="report-head">
+            <div className="report-head-title">
+              {teardownResult.title}
+              {teardownResult.mock && <span className="mock-badge">Mock data</span>}
+            </div>
+            <div className="report-head-meta">
+              {teardownResult.url} · Analyzed {new Date(teardownResult.analyzedAt).toLocaleString()}
               {teardownResult.provider && ` · ${PROVIDERS[teardownResult.provider]?.label || teardownResult.provider} · ${teardownResult.model}`}
             </div>
           </div>

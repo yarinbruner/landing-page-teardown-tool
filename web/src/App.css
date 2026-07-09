@@ -631,15 +631,15 @@
 
 .mock-badge {
   display: inline-block;
-  padding: var(--space-1) var(--space-3);
+  padding: 2px var(--space-2);
   border-radius: var(--radius-full);
   background: var(--warning-soft);
   color: var(--warning);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-bottom: var(--space-3);
+  flex-shrink: 0;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -741,30 +741,31 @@
 /* Report shell                                                            */
 /* ---------------------------------------------------------------------- */
 
+/* Deliberately not a .panel — this is page furniture (source URL, title,
+   timestamp), not a content module, so it shouldn't compete visually with
+   the screenshot/criteria panels below it for a bounded box of its own.
+   A plain inline header keeps it compact. */
 .report-head {
-  padding: var(--space-3) var(--space-5);
-  margin-bottom: var(--space-3);
+  padding: 0 var(--space-1);
+  margin-bottom: var(--space-2);
   flex-shrink: 0;
 }
 
-.report-head-url {
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
 .report-head-title {
-  font-size: 19px;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--ink);
-  margin-top: var(--space-1);
   text-wrap: balance;
 }
 
-.report-head-date {
+.report-head-meta {
   font-size: 12px;
   color: var(--ink-faint);
-  margin-top: var(--space-1);
+  margin-top: 2px;
 }
 
 /* Side-by-side at every width, deliberately — stacking into one column on
@@ -784,75 +785,81 @@
 /* Screenshot pane                                                         */
 /* ---------------------------------------------------------------------- */
 
-/* The full screenshot renders at its natural height, no internal scroll or
-   height cap — it's part of the normal page scroll like everything else. */
-/* The screenshot is often much taller than any viewport at natural size —
-   scale the whole thing down to fit instead of showing it 1:1 (which
-   would force a scroll). object-fit:contain keeps it uncropped, just
-   smaller; height:100% lets it use the full column instead of only its
-   own intrinsic (possibly tiny at this scale) size. */
+/* The one deliberate exception to the rest of the app's zero-scroll rule:
+   shrinking the full-page screenshot down to fit its column (object-fit:
+   contain) made it too small to actually read. Letting this one pane
+   scroll at near-natural width keeps the screenshot legible while every
+   other region of the report still never scrolls. */
 .shot-frame {
   height: 100%;
   min-height: 0;
   padding: var(--space-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .shot-frame img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
   display: block;
+  width: 100%;
+  height: auto;
   border-radius: var(--radius-md);
   corner-shape: squircle;
+}
+
+.shot-frame::-webkit-scrollbar {
+  width: 8px;
+}
+
+.shot-frame::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shot-frame::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
 }
 
 /* ---------------------------------------------------------------------- */
 /* Score stamp                                                             */
 /* ---------------------------------------------------------------------- */
 
+/* A circular fill-up ring instead of a bordered badge — the ring itself
+   communicates the score as a proportion (like a battery/progress
+   indicator) so the number in the middle can stay small and whole. */
 .stamp {
-  border-radius: var(--radius-full);
+  position: relative;
+  flex-shrink: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  border: 2px solid transparent;
-  background: var(--surface-2);
 }
 
-.stamp--lg {
-  width: 104px;
-  height: 104px;
-  animation: stamp-in 0.3s ease both;
+.stamp-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: stamp-in 0.5s var(--ease-spring) both;
 }
 
 @keyframes stamp-in {
   from {
     opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
+    stroke-dashoffset: var(--circumference, 0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stamp--lg {
+  .stamp-ring {
     animation: none;
   }
 }
 
-.stamp--sm {
-  width: 56px;
-  height: 56px;
+.stamp-ring-track {
+  stroke: var(--surface-2);
+}
+
+.stamp-ring-fill {
+  transition: stroke-dashoffset 0.5s var(--ease-spring);
 }
 
 .stamp-score {
@@ -862,49 +869,29 @@
   font-variant-numeric: tabular-nums;
 }
 
-.stamp-score-max {
-  font-size: 0.55em;
-  font-weight: 500;
-  opacity: 0.6;
-}
-
 .stamp--lg .stamp-score {
-  font-size: 30px;
+  font-size: 18px;
 }
 
 .stamp--sm .stamp-score {
-  font-size: 17px;
+  font-size: 13px;
 }
 
-.stamp-word {
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: 2px;
-}
-
-.stamp--lg .stamp-word {
-  font-size: 10px;
-}
-
-.stamp--sm .stamp-word {
-  font-size: 8px;
-}
-
-.stamp--success {
-  background: var(--success-soft);
-  border-color: var(--success);
+.stamp--success .stamp-ring-fill,
+.stamp--success .stamp-score {
+  stroke: var(--success);
   color: var(--success);
 }
 
-.stamp--warning {
-  background: var(--warning-soft);
-  border-color: var(--warning);
+.stamp--warning .stamp-ring-fill,
+.stamp--warning .stamp-score {
+  stroke: var(--warning);
   color: var(--warning);
 }
 
-.stamp--danger {
-  background: var(--danger-soft);
-  border-color: var(--danger);
+.stamp--danger .stamp-ring-fill,
+.stamp--danger .stamp-score {
+  stroke: var(--danger);
   color: var(--danger);
 }
 
@@ -981,38 +968,54 @@
   color: var(--ink);
 }
 
+/* Color-only swatches, not labeled pills — the name is available as a
+   tooltip/aria-label and, for whichever tab is active, is already spelled
+   out in the criterion card's own title just below. Repeating the full
+   label five times over was the single biggest space cost in this column. */
 .criteria-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
 .criteria-tab {
-  padding: var(--space-2) var(--space-4);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-full);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--ink-soft);
-  font-size: 13px;
-  font-weight: 500;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease, transform 0.3s var(--ease-spring);
+  transition: border-color 0.15s ease, transform 0.3s var(--ease-spring);
+}
+
+.criteria-tab-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--tab-color, var(--accent-strong));
+  transition: transform 0.2s var(--ease-spring);
 }
 
 .criteria-tab:hover {
-  border-color: var(--border-strong);
-  color: var(--ink);
+  border-color: var(--tab-color, var(--border-strong));
 }
 
 .criteria-tab:active {
-  transform: scale(0.97);
+  transform: scale(0.94);
 }
 
 .criteria-tab--active {
-  background: var(--tab-color, var(--accent-strong));
-  color: var(--invert-ink);
   border-color: var(--tab-color, var(--accent-strong));
+  background: color-mix(in srgb, var(--tab-color, var(--accent-strong)) 14%, var(--surface));
+}
+
+.criteria-tab--active .criteria-tab-dot {
+  transform: scale(1.2);
 }
 
 .criterion-card {

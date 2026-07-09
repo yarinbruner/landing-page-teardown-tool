@@ -79,16 +79,20 @@ export default function CriteriaReport({ teardown, providerLabel = "Claude" }) {
         <p>{highestLeverageFix}</p>
       </div>
 
-      <div className="criteria-tabs">
+      <div className="criteria-tabs" role="tablist">
         {CRITERIA_ORDER.map((key) => (
           <button
             key={key}
             type="button"
+            role="tab"
+            aria-selected={key === activeKey}
+            aria-label={CRITERIA_LABELS[key]}
+            title={CRITERIA_LABELS[key]}
             className={`criteria-tab ${key === activeKey ? "criteria-tab--active" : ""}`}
             style={{ "--tab-color": CRITERIA_COLORS[key] }}
             onClick={() => setActiveKey(key)}
           >
-            {CRITERIA_LABELS[key]}
+            <span className="criteria-tab-dot" />
           </button>
         ))}
       </div>
