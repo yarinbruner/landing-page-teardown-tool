@@ -346,8 +346,6 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
   transition: color 0.15s ease;
 }
 
@@ -524,9 +522,10 @@
   flex-wrap: wrap;
 }
 
-/* Deliberately quiet — plain underlined text tinted with each example's
-   color, not a filled pill. This is a secondary "if you're not sure" hint,
-   not a set of buttons competing with the URL bar for attention. */
+/* Deliberately quiet — plain text tinted with each example's color, not a
+   filled pill and not underlined. This is a secondary "if you're not
+   sure" hint, not a set of buttons competing with the URL bar for
+   attention. */
 .example-chip {
   padding: 0;
   border: none;
@@ -534,19 +533,16 @@
   color: color-mix(in srgb, var(--chip-color, var(--ink-soft)) 75%, var(--ink));
   font-size: 12px;
   font-weight: 600;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--chip-color, var(--ink-faint)) 50%, transparent);
-  text-underline-offset: 3px;
   cursor: pointer;
-  transition: text-decoration-color 0.15s ease, opacity 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
 .example-chip:hover:not(:disabled) {
-  text-decoration-color: var(--chip-color, var(--ink-soft));
+  opacity: 0.7;
 }
 
 .example-chip:active:not(:disabled) {
-  opacity: 0.7;
+  opacity: 0.55;
 }
 
 .example-chip:disabled {
@@ -781,45 +777,34 @@
 /* Screenshot pane                                                         */
 /* ---------------------------------------------------------------------- */
 
+/* Score + tab switcher stack above the screenshot as their own fixed-height
+   rows; the screenshot takes whatever's left. */
 .shot-wrap {
-  position: relative;
   height: 100%;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-/* The score + verdict float on top of the screenshot instead of taking a
-   fixed-height row of their own above the criteria column — that freed the
-   whole right column for the criterion card. A translucent, blurred panel
-   keeps the text legible over whatever the screenshot happens to show. */
-.score-overlay {
-  position: absolute;
-  top: var(--space-3);
-  left: var(--space-3);
-  right: var(--space-3);
-  z-index: 2;
+.score-head {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: var(--radius-lg);
-  corner-shape: squircle;
-  box-shadow: var(--shadow-sm), 0 8px 24px rgba(0, 0, 0, 0.14);
 }
 
-.score-overlay-meta {
+.score-head-meta {
   min-width: 0;
   flex: 1;
 }
 
-.score-overlay-meta .criteria-eyebrow {
+.score-head-meta .criteria-eyebrow {
   margin-bottom: 2px;
 }
 
-.score-overlay-meta .criteria-overall-verdict {
+.score-head-meta .criteria-overall-verdict {
   font-size: 13px;
   line-height: 1.4;
   display: -webkit-box;
@@ -834,7 +819,7 @@
    scroll at near-natural width keeps the screenshot legible while every
    other region of the report still never scrolls. */
 .shot-frame {
-  height: 100%;
+  flex: 1;
   min-height: 0;
   padding: var(--space-2);
   overflow-y: auto;
@@ -1007,7 +992,8 @@
    separate pills above it — the card's border now wraps both the
    criterion switcher and its content, and the name is available as a
    tooltip/aria-label plus, for whichever tab is active, spelled out in the
-   card's own title just below. */
+   card's own title just below. Sits above the screenshot, alongside the
+   score head, as its own fixed-height row. */
 .criteria-tabs {
   display: flex;
   align-self: flex-start;
@@ -1016,7 +1002,7 @@
   background: var(--surface-2);
   border-radius: var(--radius-full);
   flex-shrink: 0;
-  margin: calc(-1 * var(--space-1)) 0 var(--space-1);
+  margin-left: var(--space-1);
 }
 
 .criteria-tab {

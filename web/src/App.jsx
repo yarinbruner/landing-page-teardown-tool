@@ -1,10 +1,12 @@
 import { useState } from "react";
 import ScreenshotPane from "./components/ScreenshotPane.jsx";
-import ScoreOverlay from "./components/ScoreOverlay.jsx";
+import ScoreHead from "./components/ScoreHead.jsx";
+import CriteriaTabs from "./components/CriteriaTabs.jsx";
 import CriteriaReport from "./components/CriteriaReport.jsx";
 import LoadingTips from "./components/LoadingTips.jsx";
 import ModelPicker from "./components/ModelPicker.jsx";
 import ApiKeyPopover from "./components/ApiKeyPopover.jsx";
+import { CRITERIA_ORDER } from "./criteriaMeta.js";
 import "./App.css";
 
 // Reuses three of the five Boggle criteria colors (see CriteriaReport.jsx)
@@ -51,6 +53,9 @@ export default function App() {
   const [teardownStatus, setTeardownStatus] = useState("idle"); // idle | loading | error | done
   const [teardownError, setTeardownError] = useState(null);
   const [teardownResult, setTeardownResult] = useState(null);
+  // Always opens on the first criterion (Message & Value Prop / purple),
+  // not a "weakest first" sort — a stable, predictable starting tab.
+  const [activeCriterion, setActiveCriterion] = useState(CRITERIA_ORDER[0]);
 
   const [provider, setProviderState] = useState(() => {
     const stored = localStorage.getItem(PROVIDER_STORAGE_KEY);
@@ -122,6 +127,7 @@ export default function App() {
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "Something went wrong.");
       setTeardownResult(body);
+      setActiveCriterion(CRITERIA_ORDER[0]);
       setTeardownStatus("done");
     } catch (e) {
       setTeardownError(e.message || "Could not reach the analysis server.");
@@ -163,14 +169,15 @@ export default function App() {
 
           <div className="report-grid">
             <div className="shot-wrap">
-              <ScreenshotPane screenshotUrl={teardownResult.screenshots.full} />
-              <ScoreOverlay
+              <ScoreHead
                 overall={teardownResult.teardown.overall}
                 overallVerdict={teardownResult.teardown.overallVerdict}
                 providerLabel={PROVIDERS[teardownResult.provider]?.label || "Claude"}
               />
+              <CriteriaTabs activeKey={activeCriterion} onChange={setActiveCriterion} />
+              <ScreenshotPane screenshotUrl={teardownResult.screenshots.full} />
             </div>
-            <CriteriaReport teardown={teardownResult.teardown} />
+            <CriteriaReport teardown={teardownResult.teardown} activeKey={activeCriterion} />
           </div>
         </div>
       ) : (
