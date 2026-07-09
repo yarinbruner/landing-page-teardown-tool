@@ -75,8 +75,6 @@ export default function CriteriaReport({ teardown, activeKey, onSelectCriterion 
 
   return (
     <div className="criteria-report">
-      <CriteriaTabs activeKey={activeKey} onChange={selectCriterion} />
-
       <div className="criteria-callout panel">
         <div className="criteria-callout-label">Highest-leverage fix</div>
         <p>{highestLeverageFix}</p>
@@ -104,6 +102,8 @@ export default function CriteriaReport({ teardown, activeKey, onSelectCriterion 
             <span className="criterion-fix-label">Change this</span>
             <p>{active.whatToChange}</p>
           </div>
+
+          <CriteriaTabs activeKey={activeKey} onChange={selectCriterion} />
         </div>
       )}
     </div>
