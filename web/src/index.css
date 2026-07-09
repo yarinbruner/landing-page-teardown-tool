@@ -68,12 +68,16 @@
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(0, 0, 0, 0.03);
 
-  /* Instrument Serif: a condensed, high-contrast display serif with real
-     indie/editorial character — used for display only, at large sizes.
-     Ships as a single weight (400) — lean on size for visual weight rather
-     than faux-bold. Inter stays the body workhorse (typography.md's
-     display+body pairing). */
+  /* Three-role type system, not two — a genuine "old book" needs body copy
+     that's actually serif, not just a serif headline over sans-serif UI.
+     Instrument Serif: condensed, high-contrast display serif for headlines
+     only (single weight — lean on size, not faux-bold). Source Serif 4:
+     a highly-legible reading serif, used for reading-length passages
+     (verdicts, findings, the fix copy) — this is the "page of the book"
+     text. Inter stays for compact UI chrome (buttons, tabs, labels, dates)
+     where a serif would hurt legibility at small sizes and slow scanning. */
   --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-serif-body: "Source Serif 4", ui-serif, Georgia, serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
@@ -166,6 +170,21 @@ button {
    wobble left-right as they change — see typography.md. */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Visually hidden but still announced — for form inputs where surrounding
+   context already makes a visible label redundant on screen, but a real
+   programmatic label is still required (never placeholder-only). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Restrained ambient glow — a soft, low-opacity radial wash behind a hero

@@ -60,9 +60,14 @@ export default function ApiKeyPopover({
                 setOpen(false);
               }}
             >
+              <label className="sr-only" htmlFor="api-key-draft">
+                {providerConfig.label} API key
+              </label>
               <input
+                id="api-key-draft"
                 className="api-key-input"
                 type="password"
+                autoComplete="off"
                 placeholder={providerConfig.keyPlaceholder}
                 value={apiKeyDraft}
                 onChange={(e) => setApiKeyDraft(e.target.value)}

@@ -200,10 +200,15 @@ export default function App() {
           </div>
 
           <form className="url-bar panel" onSubmit={handleSubmit}>
-            <span className="url-bar-prefix">URL</span>
+            <label className="url-bar-prefix" htmlFor="teardown-url">
+              URL
+            </label>
             <input
+              id="teardown-url"
               className="url-bar-input"
               type="text"
+              inputMode="url"
+              autoComplete="url"
               placeholder="e.g. stripe.com"
               value={input}
               onChange={(e) => setInput(e.target.value)}
