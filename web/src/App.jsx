@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ScreenshotPane from "./components/ScreenshotPane.jsx";
+import ScoreOverlay from "./components/ScoreOverlay.jsx";
 import CriteriaReport from "./components/CriteriaReport.jsx";
 import LoadingTips from "./components/LoadingTips.jsx";
 import ModelPicker from "./components/ModelPicker.jsx";
@@ -161,11 +162,15 @@ export default function App() {
           </div>
 
           <div className="report-grid">
-            <ScreenshotPane screenshotUrl={teardownResult.screenshots.full} />
-            <CriteriaReport
-              teardown={teardownResult.teardown}
-              providerLabel={PROVIDERS[teardownResult.provider]?.label || "Claude"}
-            />
+            <div className="shot-wrap">
+              <ScreenshotPane screenshotUrl={teardownResult.screenshots.full} />
+              <ScoreOverlay
+                overall={teardownResult.teardown.overall}
+                overallVerdict={teardownResult.teardown.overallVerdict}
+                providerLabel={PROVIDERS[teardownResult.provider]?.label || "Claude"}
+              />
+            </div>
+            <CriteriaReport teardown={teardownResult.teardown} />
           </div>
         </div>
       ) : (

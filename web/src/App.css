@@ -477,7 +477,7 @@
   border-radius: var(--radius-full);
   border: none;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--invert-ink);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -485,10 +485,7 @@
 }
 
 .url-bar-submit:hover:not(:disabled) {
-  /* The hover fill is dark gold, not bright yellow — dark ink text on it
-     would fail contrast, so hover flips to light text too. */
   background: var(--accent-strong);
-  color: var(--invert-ink);
 }
 
 .url-bar-submit:active:not(:disabled) {
@@ -527,30 +524,29 @@
   flex-wrap: wrap;
 }
 
-/* Deliberately quiet — plain text with a whisper of each example's color,
-   not a full gray pill. This is a secondary "if you're not sure" hint, not
-   a set of buttons competing with the URL bar for attention. */
-/* A literal highlighter-marker swatch — a solid color wash behind dark
-   text, not colored text on a transparent chip. */
+/* Deliberately quiet — plain underlined text tinted with each example's
+   color, not a filled pill. This is a secondary "if you're not sure" hint,
+   not a set of buttons competing with the URL bar for attention. */
 .example-chip {
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-sm);
-  corner-shape: squircle;
+  padding: 0;
   border: none;
-  background: color-mix(in srgb, var(--chip-color, var(--ink-faint)) 30%, #fff);
-  color: var(--ink);
+  background: none;
+  color: color-mix(in srgb, var(--chip-color, var(--ink-soft)) 75%, var(--ink));
   font-size: 12px;
   font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--chip-color, var(--ink-faint)) 50%, transparent);
+  text-underline-offset: 3px;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.3s var(--ease-spring);
+  transition: text-decoration-color 0.15s ease, opacity 0.15s ease;
 }
 
 .example-chip:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--chip-color, var(--ink-faint)) 45%, #fff);
+  text-decoration-color: var(--chip-color, var(--ink-soft));
 }
 
 .example-chip:active:not(:disabled) {
-  transform: scale(0.95);
+  opacity: 0.7;
 }
 
 .example-chip:disabled {
@@ -785,6 +781,53 @@
 /* Screenshot pane                                                         */
 /* ---------------------------------------------------------------------- */
 
+.shot-wrap {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+}
+
+/* The score + verdict float on top of the screenshot instead of taking a
+   fixed-height row of their own above the criteria column — that freed the
+   whole right column for the criterion card. A translucent, blurred panel
+   keeps the text legible over whatever the screenshot happens to show. */
+.score-overlay {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-lg);
+  corner-shape: squircle;
+  box-shadow: var(--shadow-sm), 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.score-overlay-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.score-overlay-meta .criteria-eyebrow {
+  margin-bottom: 2px;
+}
+
+.score-overlay-meta .criteria-overall-verdict {
+  font-size: 13px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* The one deliberate exception to the rest of the app's zero-scroll rule:
    shrinking the full-page screenshot down to fit its column (object-fit:
    contain) made it too small to actually read. Letting this one pane
@@ -908,14 +951,6 @@
   overflow: hidden;
 }
 
-.criteria-head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  flex-shrink: 0;
-}
-
 .criteria-eyebrow {
   font-size: 11px;
   letter-spacing: 0.06em;
@@ -968,41 +1003,46 @@
   color: var(--ink);
 }
 
-/* Color-only swatches, not labeled pills — the name is available as a
-   tooltip/aria-label and, for whichever tab is active, is already spelled
-   out in the criterion card's own title just below. Repeating the full
-   label five times over was the single biggest space cost in this column. */
+/* One segmented toggle track living inside the card itself, not a row of
+   separate pills above it — the card's border now wraps both the
+   criterion switcher and its content, and the name is available as a
+   tooltip/aria-label plus, for whichever tab is active, spelled out in the
+   card's own title just below. */
 .criteria-tabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  align-self: flex-start;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-2);
+  border-radius: var(--radius-full);
   flex-shrink: 0;
+  margin: calc(-1 * var(--space-1)) 0 var(--space-1);
 }
 
 .criteria-tab {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
-  border: 1.5px solid var(--border);
-  background: var(--surface);
+  border: none;
+  background: transparent;
   cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.3s var(--ease-spring);
+  transition: background-color 0.2s var(--ease-spring), transform 0.3s var(--ease-spring);
 }
 
 .criteria-tab-dot {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   border-radius: var(--radius-full);
   background: var(--tab-color, var(--accent-strong));
   transition: transform 0.2s var(--ease-spring);
 }
 
 .criteria-tab:hover {
-  border-color: var(--tab-color, var(--border-strong));
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .criteria-tab:active {
@@ -1010,12 +1050,12 @@
 }
 
 .criteria-tab--active {
-  border-color: var(--tab-color, var(--accent-strong));
-  background: color-mix(in srgb, var(--tab-color, var(--accent-strong)) 14%, var(--surface));
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .criteria-tab--active .criteria-tab-dot {
-  transform: scale(1.2);
+  transform: scale(1.15);
 }
 
 .criterion-card {
@@ -1080,9 +1120,19 @@
 
 /* The one region allowed to actually run out of room — findings text
    length is LLM-generated and unbounded, and there is nowhere left to
-   shrink once everything around it is already flex-shrink:0. Clips
-   silently rather than scrolling; on any reasonable finding count/length
-   this fits comfortably, so it's a safety net, not the common case. */
+   shrink once everything around it is already flex-shrink:0. Clipped by
+   default; a "Show more" toggle (rendered only when content is actually
+   truncated — see the Findings component) switches it to its own internal
+   scroll, the same opt-in exception already granted to the screenshot
+   pane, instead of a permanent silent clip. */
+.criterion-findings-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 48px;
+  gap: var(--space-1);
+}
+
 .criterion-findings {
   margin: 0;
   padding: 0;
@@ -1091,11 +1141,36 @@
   flex-direction: column;
   gap: var(--space-2);
   flex: 1;
-  /* Guaranteed a floor even on a very short viewport — the fix box below
-     (flex-shrink:0, but capped at max-height:40% of the card) gives up
-     its room first rather than findings disappearing to 0px entirely. */
-  min-height: 48px;
+  min-height: 0;
   overflow: hidden;
+}
+
+.criterion-findings--expanded {
+  overflow-y: auto;
+}
+
+.criterion-findings-toggle {
+  flex-shrink: 0;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--space-2);
+  border: none;
+  background: none;
+  color: var(--criterion-color, var(--accent-strong));
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.criterion-findings-toggle .chevron {
+  display: inline-block;
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.criterion-findings-toggle .chevron--up {
+  transform: rotate(180deg);
 }
 
 .criterion-findings li {

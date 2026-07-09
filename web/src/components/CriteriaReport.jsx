@@ -1,5 +1,4 @@
-import { useState } from "react";
-import ScoreStamp from "./ScoreStamp.jsx";
+import { useEffect, useRef, useState } from "react";
 
 const CRITERIA_LABELS = {
   messageAndValueProp: "Message & Value Prop",
@@ -55,8 +54,51 @@ function RatingPips({ value }) {
   );
 }
 
-export default function CriteriaReport({ teardown, providerLabel = "Claude" }) {
-  const { criteria, overall, overallVerdict, highestLeverageFix } = teardown;
+// The findings list is the one region allowed to run out of room (LLM
+// finding count/length is unbounded). Instead of always silently clipping,
+// detect the clip and offer an explicit "show more" toggle — expanding
+// switches the list from clip-hidden to its own internal scroll, the same
+// exception already granted to the screenshot pane, but opt-in per card.
+function Findings({ findings }) {
+  const [expanded, setExpanded] = useState(false);
+  const [overflowing, setOverflowing] = useState(false);
+  const listRef = useRef(null);
+
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    setOverflowing(el.scrollHeight > el.clientHeight + 1);
+  }, [findings]);
+
+  return (
+    <div className="criterion-findings-wrap">
+      <ul ref={listRef} className={`criterion-findings ${expanded ? "criterion-findings--expanded" : ""}`}>
+        {findings.map((f, i) => (
+          <li key={i}>
+            <p>{f.text}</p>
+            <RatingPips value={f.rating} />
+          </li>
+        ))}
+      </ul>
+      {(overflowing || expanded) && (
+        <button
+          type="button"
+          className="criterion-findings-toggle"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+        >
+          {expanded ? "Show less" : "Show more"}
+          <span className={`chevron ${expanded ? "chevron--up" : ""}`} aria-hidden="true">
+            ⌄
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+export default function CriteriaReport({ teardown }) {
+  const { criteria, highestLeverageFix } = teardown;
 
   const weakestFirst = [...CRITERIA_ORDER].sort(
     (a, b) => (criteria[a]?.barPercent ?? 100) - (criteria[b]?.barPercent ?? 100)
@@ -66,35 +108,9 @@ export default function CriteriaReport({ teardown, providerLabel = "Claude" }) {
 
   return (
     <div className="criteria-report">
-      <header className="criteria-head panel">
-        <ScoreStamp score={overall} max={10} size="lg" />
-        <div className="criteria-head-meta">
-          <div className="criteria-eyebrow">Expert teardown — {providerLabel}, industry-standard CoT</div>
-          <p className="criteria-overall-verdict">{overallVerdict}</p>
-        </div>
-      </header>
-
       <div className="criteria-callout panel">
         <div className="criteria-callout-label">Highest-leverage fix</div>
         <p>{highestLeverageFix}</p>
-      </div>
-
-      <div className="criteria-tabs" role="tablist">
-        {CRITERIA_ORDER.map((key) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={key === activeKey}
-            aria-label={CRITERIA_LABELS[key]}
-            title={CRITERIA_LABELS[key]}
-            className={`criteria-tab ${key === activeKey ? "criteria-tab--active" : ""}`}
-            style={{ "--tab-color": CRITERIA_COLORS[key] }}
-            onClick={() => setActiveKey(key)}
-          >
-            <span className="criteria-tab-dot" />
-          </button>
-        ))}
       </div>
 
       {active && (
@@ -103,20 +119,31 @@ export default function CriteriaReport({ teardown, providerLabel = "Claude" }) {
           className="criterion-card panel"
           style={{ "--criterion-color": CRITERIA_COLORS[activeKey] }}
         >
+          <div className="criteria-tabs" role="tablist">
+            {CRITERIA_ORDER.map((key) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={key === activeKey}
+                aria-label={CRITERIA_LABELS[key]}
+                title={CRITERIA_LABELS[key]}
+                className={`criteria-tab ${key === activeKey ? "criteria-tab--active" : ""}`}
+                style={{ "--tab-color": CRITERIA_COLORS[key] }}
+                onClick={() => setActiveKey(key)}
+              >
+                <span className="criteria-tab-dot" />
+              </button>
+            ))}
+          </div>
+
           <header className="criterion-card-head">
             <span className="criterion-card-dot" />
             <span className="criterion-card-title">{CRITERIA_LABELS[activeKey]}</span>
           </header>
           <ScoreBar percent={active.barPercent} />
 
-          <ul className="criterion-findings">
-            {active.findings.map((f, i) => (
-              <li key={i}>
-                <p>{f.text}</p>
-                <RatingPips value={f.rating} />
-              </li>
-            ))}
-          </ul>
+          <Findings findings={active.findings} />
 
           <div className="criterion-fix">
             <span className="criterion-fix-label">Change this</span>
