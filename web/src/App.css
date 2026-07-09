@@ -12,6 +12,18 @@
 .masthead {
   text-align: center;
   margin-bottom: var(--space-6);
+  animation: masthead-in 0.5s ease both;
+}
+
+@keyframes masthead-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .masthead-eyebrow {
@@ -62,7 +74,7 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 }
 
 .provider-tab:hover {
@@ -70,10 +82,14 @@
   color: var(--ink);
 }
 
+.provider-tab:active {
+  transform: scale(0.97);
+}
+
 .provider-tab--active {
-  background: var(--ink);
-  color: var(--bg);
-  border-color: var(--ink);
+  background: var(--accent-strong);
+  color: #fff;
+  border-color: var(--accent-strong);
 }
 
 .model-select {
@@ -107,12 +123,17 @@
   background: none;
   border: none;
   padding: 0;
-  color: var(--ink);
+  color: var(--accent);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+
+.api-key-link:hover {
+  color: var(--ink);
 }
 
 .api-key-form {
@@ -193,16 +214,20 @@
   padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-sm);
   border: none;
-  background: var(--invert-bg);
-  color: var(--invert-ink);
+  background: var(--accent-strong);
+  color: #fff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
 .url-bar-submit:hover:not(:disabled) {
-  opacity: 0.85;
+  background: var(--accent-solid-hover);
+}
+
+.url-bar-submit:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .url-bar-submit:disabled {
@@ -263,7 +288,7 @@
 }
 
 .test-mode-row input {
-  accent-color: var(--ink);
+  accent-color: var(--accent-strong);
 }
 
 .mock-badge {
@@ -329,7 +354,7 @@
   width: 40%;
   height: 100%;
   border-radius: var(--radius-full);
-  background: var(--ink);
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
   animation: sweep 1.6s ease-in-out infinite;
 }
 
@@ -495,6 +520,7 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .stamp-score-max {
@@ -578,14 +604,16 @@
 
 .criteria-callout {
   padding: var(--space-4) var(--space-5);
-  background: var(--surface-2);
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
 
 .criteria-callout-label {
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  font-weight: 700;
+  color: var(--accent);
   margin-bottom: var(--space-2);
 }
 
@@ -611,7 +639,7 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 }
 
 .criteria-tab:hover {
@@ -619,10 +647,14 @@
   color: var(--ink);
 }
 
+.criteria-tab:active {
+  transform: scale(0.97);
+}
+
 .criteria-tab--active {
-  background: var(--ink);
-  color: var(--bg);
-  border-color: var(--ink);
+  background: var(--accent-strong);
+  color: #fff;
+  border-color: var(--accent-strong);
 }
 
 .criterion-card {
@@ -658,6 +690,7 @@
 .score-bar-fill {
   height: 100%;
   border-radius: var(--radius-full);
+  transition: width 0.4s ease;
 }
 
 .score-bar-fill--success {
@@ -715,8 +748,8 @@
 .criterion-fix {
   padding: var(--space-4);
   border-radius: var(--radius-md);
-  background: var(--warning-soft);
-  border: 1px solid var(--warning);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
 }
 
 .criterion-fix-label {
@@ -725,7 +758,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--warning);
+  color: var(--accent);
   margin-bottom: var(--space-1);
 }
 

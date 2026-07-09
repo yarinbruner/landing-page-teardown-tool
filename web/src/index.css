@@ -1,7 +1,10 @@
-/* Design system derived from memorisely.com: dark, monochrome, Inter,
-   tight letter-spacing on display type, hairline borders (no blur/glass),
-   small-radius controls, large-radius panels, color reserved for semantic
-   status only. */
+/* Design system: dark, near-monochrome base with one deliberate signature
+   accent (see color-systems.md — a product with only semantic colors and no
+   dedicated brand accent reads as generic). Fraunces for display type paired
+   with Inter for body (typography.md — one font for everything is the
+   fastest way to look like an unstyled template). Hairline borders, no
+   heavy glass (current-trends-2026.md — decorative glassmorphism is fading;
+   flat surfaces with a restrained accent read as current). */
 :root {
   /* Surfaces */
   --bg: #171717;
@@ -15,11 +18,24 @@
   --ink-soft: rgba(255, 255, 255, 0.65);
   --ink-faint: rgba(255, 255, 255, 0.4);
 
-  /* Inverted controls (white-on-dark primary action) */
+  /* Inverted controls (white-on-dark, used for low-emphasis toggles) */
   --invert-bg: #ffffff;
   --invert-ink: #171717;
 
-  /* Semantic — the only color in the system, reserved for status */
+  /* Signature accent — terracotta. Distinct hue-family from every semantic
+     color below on purpose, so it's never ambiguous whether something is
+     "the brand color" or "a status." Used for primary actions, active
+     states, focus rings, links — the one thing per screen that should read
+     as unmistakably interactive/on-brand.
+     Two lightness steps, not one, because "accent as text on dark" and
+     "accent as a solid fill under white text" need different values to
+     both clear WCAG AA (4.5:1) — a single terracotta can't satisfy both. */
+  --accent: #e2643a; /* text/links/borders/focus — 5.2:1 against --bg */
+  --accent-strong: #b8431e; /* solid fills (buttons, active tabs) — white text on it is 5.4:1 */
+  --accent-solid-hover: #9c3716; /* hover/press on solid fills — 7.1:1 */
+  --accent-soft: rgba(226, 100, 58, 0.14);
+
+  /* Semantic — status only, never reused decoratively */
   --success: #4ade80;
   --success-soft: rgba(74, 222, 128, 0.14);
   --warning: #fbbf24;
@@ -46,9 +62,9 @@
 
   --shadow-sm: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(0, 0, 0, 0.3);
 
-  --font-display: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 * {
@@ -82,12 +98,12 @@ button {
 }
 
 ::selection {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--accent);
+  color: #fff;
 }
 
 :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -100,4 +116,39 @@ button {
 
 .pill {
   border-radius: var(--radius-full);
+}
+
+/* Numeric data (scores) should sit in a fixed-width grid so digits don't
+   wobble left-right as they change — see typography.md. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Restrained ambient glow — a soft, low-opacity radial wash behind a hero
+   element for a touch of depth. Deliberately not full glassmorphism: no
+   blur, no translucent panel, just a background tint the layout sits on
+   top of. See current-trends-2026.md "what's fading" — this is the
+   targeted, small-footprint use of the technique, not the wall-to-wall one. */
+.accent-glow {
+  position: relative;
+}
+
+.accent-glow::before {
+  content: "";
+  position: absolute;
+  inset: -80px -20% auto -20%;
+  height: 320px;
+  background: radial-gradient(ellipse at center, var(--accent-soft) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

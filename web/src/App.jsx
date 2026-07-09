@@ -126,7 +126,7 @@ export default function App() {
 
   return (
     <div className="page">
-      <header className="masthead">
+      <header className="masthead accent-glow">
         <div className="masthead-eyebrow">Landing Page Teardown</div>
         <h1 className="masthead-title">Score the pitch, not just the paint.</h1>
         <p className="masthead-sub">
