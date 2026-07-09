@@ -24,16 +24,16 @@
   --invert-bg: #2b2013;
   --invert-ink: #fbf4e4;
 
-  /* Primary accent — marker yellow. Two steps with two different jobs, not
-     two lightnesses of the same job: --accent (bright) is fill-only,
-     always paired with dark ink text/icons on top (14.5:1 — pure yellow
-     fails outright as text-on-cream or as a focus outline, both under
-     3:1). --accent-strong (dark gold) is the text/link/border/focus-ring
-     color, and doubles as a hover fill — but a hover fill this dark needs
-     light (--invert-ink) text on top, not dark ink; see App.css usages. */
-  --accent: #f5c400; /* fill-only — ink text on it is 9.7:1 */
-  --accent-strong: #8a6300; /* text/links/focus — 5.0:1 on cream; invert-ink on it is 5.0:1 */
-  --accent-soft: rgba(245, 196, 0, 0.22); /* literal highlighter-marker wash */
+  /* Primary accent — an aged-gold marker tone, softer than a raw highlighter
+     yellow (which read as too bright/loud). Two steps with two different
+     jobs, not two lightnesses of the same job: --accent is fill-only,
+     always paired with dark ink text/icons on top. --accent-strong is the
+     text/link/border/focus-ring color, and doubles as a hover fill — but a
+     hover fill this dark needs light (--invert-ink) text on top, not dark
+     ink; see App.css usages. */
+  --accent: #d9a441; /* fill-only — ink text on it is 7.1:1 */
+  --accent-strong: #8a5f1e; /* text/links/focus — 5.1:1 on cream; invert-ink on it is 5.1:1 */
+  --accent-soft: rgba(217, 164, 65, 0.2); /* literal highlighter-marker wash */
 
   /* Semantic — status only, never reused decoratively. Re-verified on the
      cream background specifically (danger and the boggle "friction" color
@@ -68,16 +68,11 @@
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(0, 0, 0, 0.03);
 
-  /* Three-role type system, not two — a genuine "old book" needs body copy
-     that's actually serif, not just a serif headline over sans-serif UI.
-     Instrument Serif: condensed, high-contrast display serif for headlines
-     only (single weight — lean on size, not faux-bold). Source Serif 4:
-     a highly-legible reading serif, used for reading-length passages
-     (verdicts, findings, the fix copy) — this is the "page of the book"
-     text. Inter stays for compact UI chrome (buttons, tabs, labels, dates)
-     where a serif would hurt legibility at small sizes and slow scanning. */
+  /* Instrument Serif carries the one big headline moment — a single
+     characterful accent, not a whole-page "book" typesetting exercise.
+     Everything else, including reading-length copy, stays Inter; too much
+     serif reads as trying too hard rather than as considered restraint. */
   --font-display: "Instrument Serif", ui-serif, Georgia, serif;
-  --font-serif-body: "Source Serif 4", ui-serif, Georgia, serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 

@@ -82,8 +82,7 @@
 }
 
 .masthead-sub {
-  font-family: var(--font-serif-body);
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.6;
   color: var(--ink-soft);
   max-width: 560px;
@@ -114,7 +113,7 @@
   gap: var(--space-3);
   flex-wrap: wrap;
   max-width: 640px;
-  margin: 0 auto var(--space-5);
+  margin: 0 auto var(--space-4);
 }
 
 /* Model picker — one pill, one popover with provider + model together --- */
@@ -499,7 +498,7 @@
   gap: var(--space-3);
   flex-wrap: wrap;
   max-width: 640px;
-  margin: 0 auto var(--space-6);
+  margin: 0 auto;
 }
 
 .examples {
@@ -721,21 +720,9 @@
 /* Report shell                                                            */
 /* ---------------------------------------------------------------------- */
 
-/* The report screen fits the viewport instead of the page scrolling — only
-   the screenshot pane and the findings list (the two places content length
-   is unbounded) scroll internally. Everything else (back button, header,
-   score/verdict, tabs) is fixed height. */
-.screen--report {
-  display: flex;
-  flex-direction: column;
-  height: calc(100dvh - var(--space-5) * 2);
-  min-height: 0;
-}
-
 .report-head {
-  flex-shrink: 0;
-  padding: var(--space-3) var(--space-5);
-  margin-bottom: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-5);
 }
 
 .report-head-url {
@@ -744,10 +731,9 @@
 }
 
 .report-head-title {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: 0;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--ink);
   margin-top: var(--space-1);
   text-wrap: balance;
@@ -763,22 +749,12 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   gap: var(--space-5);
-  align-items: stretch;
-  flex: 1;
-  min-height: 0;
+  align-items: start;
 }
 
 @media (max-width: 800px) {
-  /* Narrow viewports don't have room for a fixed-height two-column split —
-     fall back to a normal scrolling single column instead of cramming a
-     screenshot and a full report into one screen. */
-  .screen--report {
-    height: auto;
-    display: block;
-  }
   .report-grid {
     grid-template-columns: 1fr;
-    display: block;
   }
 }
 
@@ -788,8 +764,10 @@
 
 .shot-frame {
   padding: var(--space-2);
-  height: 100%;
+  max-height: 80vh;
   overflow-y: auto;
+  position: sticky;
+  top: var(--space-5);
 }
 
 .shot-frame img {
@@ -801,7 +779,7 @@
 
 @media (max-width: 800px) {
   .shot-frame {
-    height: auto;
+    position: static;
     max-height: none;
     overflow-y: visible;
   }
@@ -822,31 +800,20 @@
   background: var(--surface-2);
 }
 
-/* Signature element: the overall score reads as a teacher's rubber stamp
-   pressed onto the page at a slight angle, not a neutral badge — this is
-   the one place the whole "grade the page" premise gets a deliberate,
-   memorable visual moment (see frontend-design's "spend your boldness in
-   one place"). A second, slightly offset ring stands in for the uneven
-   ink transfer of a real stamp; everything else on the page stays quiet. */
 .stamp--lg {
   width: 104px;
   height: 104px;
-  transform: rotate(-5deg);
-  box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px currentColor;
-  animation: stamp-down 0.5s cubic-bezier(0.2, 1.8, 0.4, 1) both;
+  animation: stamp-in 0.3s ease both;
 }
 
-@keyframes stamp-down {
-  0% {
+@keyframes stamp-in {
+  from {
     opacity: 0;
-    transform: rotate(4deg) scale(1.6);
+    transform: scale(0.92);
   }
-  60% {
+  to {
     opacity: 1;
-  }
-  100% {
-    opacity: 1;
-    transform: rotate(-5deg) scale(1);
+    transform: scale(1);
   }
 }
 
@@ -862,9 +829,8 @@
 }
 
 .stamp-score {
-  font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -923,8 +889,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  height: 100%;
-  min-height: 0;
 }
 
 .criteria-head {
@@ -944,16 +908,15 @@
 }
 
 .criteria-overall-verdict {
-  font-family: var(--font-serif-body);
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--ink);
   font-weight: 500;
 }
 
 .criteria-callout {
-  padding: var(--space-3) var(--space-5);
+  padding: var(--space-4) var(--space-5);
   background: var(--accent-soft);
   border-color: var(--accent-strong);
   flex-shrink: 0;
@@ -969,9 +932,8 @@
 }
 
 .criteria-callout p {
-  font-family: var(--font-serif-body);
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.5;
   color: var(--ink);
 }
@@ -1016,12 +978,6 @@
   flex-direction: column;
   gap: var(--space-4);
   animation: card-in 0.4s var(--ease-spring) both;
-  flex: 1;
-  /* Never shrink below a usable size — on a very cramped window this lets
-     the outer page take over and scroll a little rather than squeezing the
-     most important content (the actual findings) down to nothing. */
-  min-height: 260px;
-  overflow: hidden;
 }
 
 @keyframes card-in {
@@ -1051,10 +1007,9 @@
 }
 
 .criterion-card-title {
-  font-family: var(--font-display);
-  font-size: 19px;
-  font-weight: 400;
-  letter-spacing: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--ink);
 }
 
@@ -1081,9 +1036,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .criterion-findings li {
@@ -1094,9 +1046,8 @@
 }
 
 .criterion-findings p {
-  font-family: var(--font-serif-body);
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--ink-soft);
 }
@@ -1138,9 +1089,8 @@
 }
 
 .criterion-fix p {
-  font-family: var(--font-serif-body);
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.5;
   color: var(--ink);
