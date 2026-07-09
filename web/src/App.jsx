@@ -2,9 +2,18 @@ import { useState } from "react";
 import ScreenshotPane from "./components/ScreenshotPane.jsx";
 import CriteriaReport from "./components/CriteriaReport.jsx";
 import LoadingTips from "./components/LoadingTips.jsx";
+import ModelPicker from "./components/ModelPicker.jsx";
+import ApiKeyPopover from "./components/ApiKeyPopover.jsx";
 import "./App.css";
 
-const EXAMPLES = ["stripe.com", "linear.app", "notion.com"];
+// Reuses three of the five Boggle criteria colors (see CriteriaReport.jsx)
+// so the input screen isn't purely monochrome+blue — a light touch of the
+// same playful palette that shows up in the report.
+const EXAMPLES = [
+  { url: "stripe.com", color: "#7c3aed" },
+  { url: "linear.app", color: "#0f766e" },
+  { url: "notion.com", color: "#8a5a05" },
+];
 const TEST_MODE_STORAGE_KEY = "teardown:testMode";
 const PROVIDER_STORAGE_KEY = "teardown:provider";
 const MODEL_STORAGE_KEY_PREFIX = "teardown:model:";
@@ -124,141 +133,22 @@ export default function App() {
     runTeardown(input);
   }
 
+  function backToInput() {
+    setTeardownStatus("idle");
+    setTeardownResult(null);
+    setTeardownError(null);
+  }
+
+  const showReport = teardownStatus === "done" && teardownResult;
+
   return (
     <div className="page">
-      <header className="masthead accent-glow">
-        <div className="masthead-eyebrow">Landing Page Teardown</div>
-        <h1 className="masthead-title">Score the pitch, not just the paint.</h1>
-        <p className="masthead-sub">
-          Drop in a URL. Claude or OpenAI runs it through an industry-standard conversion teardown — message
-          &amp; value prop, call to action, trust, friction, and urgency — using your own API key.
-        </p>
-      </header>
-
-      <div className="provider-row">
-        {Object.entries(PROVIDERS).map(([key, cfg]) => (
-          <button
-            key={key}
-            type="button"
-            className={`provider-tab ${provider === key ? "provider-tab--active" : ""}`}
-            onClick={() => selectProvider(key)}
-          >
-            {cfg.label}
+      {showReport ? (
+        <div className="screen screen--report" key="report">
+          <button type="button" className="back-button" onClick={backToInput}>
+            ← New teardown
           </button>
-        ))}
-        <select className="model-select" value={model} onChange={(e) => selectModel(e.target.value)}>
-          {providerConfig.models.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-      </div>
 
-      <div className="api-key-row panel">
-        {editingKey ? (
-          <form
-            className="api-key-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              saveApiKey();
-            }}
-          >
-            <input
-              className="api-key-input"
-              type="password"
-              placeholder={providerConfig.keyPlaceholder}
-              value={apiKeyDraft}
-              onChange={(e) => setApiKeyDraft(e.target.value)}
-              autoFocus
-              spellCheck={false}
-            />
-            <button className="api-key-save" type="submit">
-              Save
-            </button>
-            <button className="api-key-cancel" type="button" onClick={cancelEditingKey}>
-              Cancel
-            </button>
-          </form>
-        ) : apiKey ? (
-          <span className="api-key-status">
-            {providerConfig.label} API key saved (stays in your browser) ·{" "}
-            <button className="api-key-link" type="button" onClick={() => setEditingKey(true)}>
-              change
-            </button>{" "}
-            ·{" "}
-            <button className="api-key-link" type="button" onClick={clearApiKey}>
-              clear
-            </button>
-          </span>
-        ) : (
-          <span className="api-key-status">
-            No {providerConfig.label} API key added —{" "}
-            <button className="api-key-link" type="button" onClick={() => setEditingKey(true)}>
-              add one
-            </button>{" "}
-            from {providerConfig.keyHelp} to run a teardown
-          </span>
-        )}
-      </div>
-
-      <label className="test-mode-row">
-        <input type="checkbox" checked={testMode} onChange={toggleTestMode} />
-        Test mode — mock data, no API cost
-      </label>
-
-      <form className="url-bar panel" onSubmit={handleSubmit}>
-        <span className="url-bar-prefix">URL</span>
-        <input
-          className="url-bar-input"
-          type="text"
-          placeholder="e.g. stripe.com"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          spellCheck={false}
-          autoFocus
-        />
-        <button
-          className="url-bar-submit"
-          type="submit"
-          disabled={(!apiKey && !testMode) || teardownStatus === "loading"}
-          title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
-        >
-          {teardownStatus === "loading" ? "Tearing down…" : "Tear it down →"}
-        </button>
-      </form>
-
-      {teardownStatus === "idle" && (
-        <div className="examples">
-          <span>Try:</span>
-          {EXAMPLES.map((ex) => (
-            <button
-              key={ex}
-              type="button"
-              className="example-chip"
-              disabled={!apiKey && !testMode}
-              title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
-              onClick={() => {
-                setInput(ex);
-                runTeardown(ex);
-              }}
-            >
-              {ex}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {teardownStatus === "error" && (
-        <div className="banner banner--error panel">
-          <strong>Couldn't complete the teardown.</strong> {teardownError}
-        </div>
-      )}
-
-      {teardownStatus === "loading" && <LoadingTips />}
-
-      {teardownStatus === "done" && teardownResult && (
-        <div className="report">
           <div className="report-head panel">
             {teardownResult.mock && <div className="mock-badge">Mock data — no API call was made</div>}
             <div className="report-head-url">{teardownResult.url}</div>
@@ -276,6 +166,101 @@ export default function App() {
               providerLabel={PROVIDERS[teardownResult.provider]?.label || "Claude"}
             />
           </div>
+        </div>
+      ) : (
+        <div className="screen" key="input">
+          <header className="masthead accent-glow">
+            <div className="masthead-eyebrow">Landing Page Teardown</div>
+            <h1 className="masthead-title">Score the pitch, not just the paint.</h1>
+            <p className="masthead-sub">
+              Drop in a URL. Claude or OpenAI runs it through an industry-standard conversion teardown — message
+              &amp; value prop, call to action, trust, friction, and urgency — using your own API key.
+            </p>
+          </header>
+
+          <div className="settings-row">
+            <ModelPicker
+              providers={PROVIDERS}
+              provider={provider}
+              model={model}
+              onSelectProvider={selectProvider}
+              onSelectModel={selectModel}
+            />
+            <ApiKeyPopover
+              providerConfig={providerConfig}
+              apiKey={apiKey}
+              editingKey={editingKey}
+              setEditingKey={setEditingKey}
+              apiKeyDraft={apiKeyDraft}
+              setApiKeyDraft={setApiKeyDraft}
+              saveApiKey={saveApiKey}
+              clearApiKey={clearApiKey}
+              cancelEditingKey={cancelEditingKey}
+            />
+          </div>
+
+          <form className="url-bar panel" onSubmit={handleSubmit}>
+            <span className="url-bar-prefix">URL</span>
+            <input
+              className="url-bar-input"
+              type="text"
+              placeholder="e.g. stripe.com"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              spellCheck={false}
+              autoFocus
+            />
+            <button
+              className="url-bar-submit"
+              type="submit"
+              disabled={(!apiKey && !testMode) || teardownStatus === "loading"}
+              title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
+            >
+              {teardownStatus === "loading" ? "Tearing down…" : "Teardown →"}
+            </button>
+          </form>
+
+          <div className="below-url-row">
+            <label className="test-mode-row">
+              <span className="toggle-switch">
+                <input type="checkbox" checked={testMode} onChange={toggleTestMode} />
+                <span className="toggle-track">
+                  <span className="toggle-thumb" />
+                </span>
+              </span>
+              Test mode (No API)
+            </label>
+
+            {teardownStatus === "idle" && (
+              <div className="examples">
+                <span>Try:</span>
+                {EXAMPLES.map((ex) => (
+                  <button
+                    key={ex.url}
+                    type="button"
+                    className="example-chip"
+                    style={{ "--chip-color": ex.color }}
+                    disabled={!apiKey && !testMode}
+                    title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
+                    onClick={() => {
+                      setInput(ex.url);
+                      runTeardown(ex.url);
+                    }}
+                  >
+                    {ex.url}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {teardownStatus === "error" && (
+            <div className="banner banner--error panel">
+              <strong>Couldn't complete the teardown.</strong> {teardownError}
+            </div>
+          )}
+
+          {teardownStatus === "loading" && <LoadingTips />}
         </div>
       )}
     </div>

@@ -17,11 +17,30 @@ const CRITERIA_ORDER = [
   "urgencyAndMotivation",
 ];
 
+// A bold, distinct color per criterion instead of one repeated brand accent
+// — each hex verified to clear 4.5:1 (WCAG AA) both as text and as a solid
+// fill under white text, against the cream --bg specifically (its lower
+// luminance than pure white pushed the friction/urgency shades below 4.5:1,
+// so they're darkened slightly from the pre-cream-redesign values). Picked
+// for a loose thematic fit (trust = teal/"green light", urgency = red,
+// friction = caution-yellow) rather than assigned randomly, so the color
+// still reads as systematic.
+const CRITERIA_COLORS = {
+  messageAndValueProp: "#7c3aed",
+  callToAction: "#2563eb",
+  trustAndCredibility: "#0f766e",
+  frictionAndClarity: "#8a5a05",
+  urgencyAndMotivation: "#b71c1c",
+};
+
 function ScoreBar({ percent }) {
-  const tier = percent >= 80 ? "success" : percent >= 50 ? "warning" : "danger";
+  // Uses the criterion's own color (inherited via --criterion-color from
+  // the parent .criterion-card) rather than a separate success/warning/
+  // danger severity color, so the whole card — tab, dot, bar, fix box —
+  // reads as one consistent color instead of two competing ones.
   return (
     <div className="score-bar" role="img" aria-label={`${percent}%`}>
-      <div className={`score-bar-fill score-bar-fill--${tier}`} style={{ width: `${percent}%` }} />
+      <div className="score-bar-fill" style={{ width: `${percent}%` }} />
     </div>
   );
 }
@@ -66,6 +85,7 @@ export default function CriteriaReport({ teardown, providerLabel = "Claude" }) {
             key={key}
             type="button"
             className={`criteria-tab ${key === activeKey ? "criteria-tab--active" : ""}`}
+            style={{ "--tab-color": CRITERIA_COLORS[key] }}
             onClick={() => setActiveKey(key)}
           >
             {CRITERIA_LABELS[key]}
@@ -74,8 +94,13 @@ export default function CriteriaReport({ teardown, providerLabel = "Claude" }) {
       </div>
 
       {active && (
-        <div className="criterion-card panel">
+        <div
+          key={activeKey}
+          className="criterion-card panel"
+          style={{ "--criterion-color": CRITERIA_COLORS[activeKey] }}
+        >
           <header className="criterion-card-head">
+            <span className="criterion-card-dot" />
             <span className="criterion-card-title">{CRITERIA_LABELS[activeKey]}</span>
           </header>
           <ScoreBar percent={active.barPercent} />

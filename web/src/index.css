@@ -1,47 +1,50 @@
-/* Design system: dark, near-monochrome base with one deliberate signature
-   accent (see color-systems.md — a product with only semantic colors and no
-   dedicated brand accent reads as generic). Fraunces for display type paired
-   with Inter for body (typography.md — one font for everything is the
-   fastest way to look like an unstyled template). Hairline borders, no
-   heavy glass (current-trends-2026.md — decorative glassmorphism is fading;
-   flat surfaces with a restrained accent read as current). */
+/* Design system: warm cream "old book" paper base — a student's textbook,
+   not a blank white app. A bold marker-yellow accent stands in for a
+   highlighter pen; a five-color "Boggle" palette (see App.jsx's
+   CRITERION_COLORS) gives each of the five teardown criteria its own
+   identity. Every color re-verified against WCAG AA on the actual cream
+   background (not white — cream's lower luminance pushed two colors below
+   4.5:1 that passed on white, and pure yellow fails as text/outline
+   entirely, which is why it's fill-only — see color-systems.md). Sans-serif
+   body (Inter) + Instrument Serif display, hairline sepia borders. */
 :root {
-  /* Surfaces */
-  --bg: #171717;
-  --surface: #212121;
-  --surface-2: #2a2a2a;
-  --border: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.18);
+  /* Surfaces — layered cream, each step a little more "aged" */
+  --bg: #fbf4e4;
+  --surface: #f3e9d2;
+  --surface-2: #eadfc0;
+  --border: rgba(90, 66, 30, 0.18);
+  --border-strong: rgba(90, 66, 30, 0.32);
 
-  /* Ink / text */
-  --ink: #ffffff;
-  --ink-soft: rgba(255, 255, 255, 0.65);
-  --ink-faint: rgba(255, 255, 255, 0.4);
+  /* Ink / text — warm sepia-black, not pure black */
+  --ink: #2b2013;
+  --ink-soft: rgba(43, 32, 19, 0.68);
+  --ink-faint: rgba(43, 32, 19, 0.45);
 
-  /* Inverted controls (white-on-dark, used for low-emphasis toggles) */
-  --invert-bg: #ffffff;
-  --invert-ink: #171717;
+  /* Inverted controls (dark-on-cream, used for low-emphasis toggles) */
+  --invert-bg: #2b2013;
+  --invert-ink: #fbf4e4;
 
-  /* Signature accent — terracotta. Distinct hue-family from every semantic
-     color below on purpose, so it's never ambiguous whether something is
-     "the brand color" or "a status." Used for primary actions, active
-     states, focus rings, links — the one thing per screen that should read
-     as unmistakably interactive/on-brand.
-     Two lightness steps, not one, because "accent as text on dark" and
-     "accent as a solid fill under white text" need different values to
-     both clear WCAG AA (4.5:1) — a single terracotta can't satisfy both. */
-  --accent: #e2643a; /* text/links/borders/focus — 5.2:1 against --bg */
-  --accent-strong: #b8431e; /* solid fills (buttons, active tabs) — white text on it is 5.4:1 */
-  --accent-solid-hover: #9c3716; /* hover/press on solid fills — 7.1:1 */
-  --accent-soft: rgba(226, 100, 58, 0.14);
+  /* Primary accent — marker yellow. Two steps with two different jobs, not
+     two lightnesses of the same job: --accent (bright) is fill-only,
+     always paired with dark ink text/icons on top (14.5:1 — pure yellow
+     fails outright as text-on-cream or as a focus outline, both under
+     3:1). --accent-strong (dark gold) is the text/link/border/focus-ring
+     color, and doubles as a hover fill — but a hover fill this dark needs
+     light (--invert-ink) text on top, not dark ink; see App.css usages. */
+  --accent: #f5c400; /* fill-only — ink text on it is 9.7:1 */
+  --accent-strong: #8a6300; /* text/links/focus — 5.0:1 on cream; invert-ink on it is 5.0:1 */
+  --accent-soft: rgba(245, 196, 0, 0.22); /* literal highlighter-marker wash */
 
-  /* Semantic — status only, never reused decoratively */
-  --success: #4ade80;
-  --success-soft: rgba(74, 222, 128, 0.14);
-  --warning: #fbbf24;
-  --warning-soft: rgba(251, 191, 36, 0.14);
-  --danger: #fb7185;
-  --danger-soft: rgba(251, 113, 133, 0.14);
+  /* Semantic — status only, never reused decoratively. Re-verified on the
+     cream background specifically (danger and the boggle "friction" color
+     both needed to darken slightly from their white-background values to
+     hold 4.5:1 on cream's lower luminance). */
+  --success: #15803d;
+  --success-soft: rgba(21, 128, 61, 0.12);
+  --warning: #b45309;
+  --warning-soft: rgba(180, 83, 9, 0.12);
+  --danger: #b71c1c;
+  --danger-soft: rgba(183, 28, 28, 0.12);
 
   /* Spacing (4px base) */
   --space-1: 4px;
@@ -53,18 +56,34 @@
   --space-7: 48px;
   --space-8: 64px;
 
-  /* Radius — small for controls, full for pills/badges, large for panels */
+  /* Radius — every rounded corner in the app traces to one of these five
+     steps (layout-and-spacing.md's radius-scale rule); nothing is a
+     one-off pixel value picked by eye. */
+  --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 24px;
   --radius-xl: 28px;
   --radius-full: 999px;
 
-  --shadow-sm: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(0, 0, 0, 0.03);
 
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  /* Instrument Serif: a condensed, high-contrast display serif with real
+     indie/editorial character — used for display only, at large sizes.
+     Ships as a single weight (400) — lean on size for visual weight rather
+     than faux-bold. Inter stays the body workhorse (typography.md's
+     display+body pairing). */
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Apple-style spring easing — a slight overshoot on the way in, used for
+     press/hover feedback and popovers so interactions feel alive rather
+     than mechanical. Reserve the overshoot for small, fast transforms; a
+     plain ease is still correct for color/opacity fades (current-trends-
+     2026.md's "restrained motion" — spring everywhere, not just motion
+     everywhere, is the point). */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * {
@@ -75,10 +94,19 @@ html,
 body {
   margin: 0;
   padding: 0;
+  /* Defensive: no single decorative element (glow, wide panel, etc.) should
+     ever be able to create a page-level horizontal scrollbar. */
+  overflow-x: hidden;
 }
 
 body {
   background: var(--bg);
+  /* Light dot-grid texture — a faint, evenly-spaced radial-dot pattern
+     rather than a flat fill, so the background reads as textured paper
+     instead of a blank white void. Low enough contrast to disappear at a
+     glance; only visible as texture on close look. */
+  background-image: radial-gradient(rgba(90, 66, 30, 0.12) 1px, transparent 1px);
+  background-size: 22px 22px;
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -93,25 +121,41 @@ a {
   color: inherit;
 }
 
+/* Widow/orphan control (https://en.wikipedia.org/wiki/Widows_and_orphans) —
+   text-wrap:pretty keeps a paragraph's last line from stranding a single
+   short word; headlines get the stronger text-wrap:balance instead (set
+   per-element, since balance is only appropriate for short, few-line
+   text — see typography.md). */
+p {
+  text-wrap: pretty;
+}
+
 button {
   font-family: inherit;
 }
 
 ::selection {
+  /* Literal highlighter-marker effect — yellow wash, dark ink text on top. */
   background: var(--accent);
-  color: #fff;
+  color: var(--ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  /* Bright --accent yellow fails even the 3:1 UI-component contrast
+     minimum as an outline on cream — the darker gold clears it easily. */
+  outline: 2px solid var(--accent-strong);
   outline-offset: 2px;
 }
 
-/* Flat surface panel — hairline border, no blur, no transparency */
+/* Flat surface panel — hairline border, no blur, no transparency.
+   corner-shape is progressive enhancement (Chrome 139+; falls back to a
+   plain rounded corner everywhere else — see MDN/chromestatus) that turns
+   the rounded corner into a true squircle instead of a circular arc. */
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  corner-shape: squircle;
 }
 
 .pill {
@@ -125,18 +169,17 @@ button {
 }
 
 /* Restrained ambient glow — a soft, low-opacity radial wash behind a hero
-   element for a touch of depth. Deliberately not full glassmorphism: no
-   blur, no translucent panel, just a background tint the layout sits on
-   top of. See current-trends-2026.md "what's fading" — this is the
-   targeted, small-footprint use of the technique, not the wall-to-wall one. */
+   element for a touch of depth. Contained within its own box (no bleed past
+   the viewport) so it can never cause horizontal overflow. */
 .accent-glow {
   position: relative;
+  overflow: hidden;
 }
 
 .accent-glow::before {
   content: "";
   position: absolute;
-  inset: -80px -20% auto -20%;
+  inset: -80px 0 auto 0;
   height: 320px;
   background: radial-gradient(ellipse at center, var(--accent-soft) 0%, transparent 70%);
   pointer-events: none;
