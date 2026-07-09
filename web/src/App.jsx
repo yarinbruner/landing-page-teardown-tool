@@ -169,7 +169,7 @@ export default function App() {
         </div>
       ) : (
         <div className="screen" key="input">
-          <header className="masthead accent-glow">
+          <header className="masthead">
             <div className="masthead-eyebrow">Landing Page Teardown</div>
             <h1 className="masthead-title">Score the pitch, not just the paint.</h1>
             <p className="masthead-sub">
@@ -199,73 +199,77 @@ export default function App() {
             />
           </div>
 
-          <form className="url-bar panel" onSubmit={handleSubmit}>
-            <label className="url-bar-prefix" htmlFor="teardown-url">
-              URL
-            </label>
-            <input
-              id="teardown-url"
-              className="url-bar-input"
-              type="text"
-              inputMode="url"
-              autoComplete="url"
-              placeholder="e.g. stripe.com"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              spellCheck={false}
-              autoFocus
-            />
-            <button
-              className="url-bar-submit"
-              type="submit"
-              disabled={(!apiKey && !testMode) || teardownStatus === "loading"}
-              title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
-            >
-              {teardownStatus === "loading" ? "Tearing down…" : "Teardown →"}
-            </button>
-          </form>
+          {teardownStatus === "loading" ? (
+            <LoadingTips />
+          ) : (
+            <>
+              <form className="url-bar panel" onSubmit={handleSubmit}>
+                <label className="url-bar-prefix" htmlFor="teardown-url">
+                  URL
+                </label>
+                <input
+                  id="teardown-url"
+                  className="url-bar-input"
+                  type="text"
+                  inputMode="url"
+                  autoComplete="url"
+                  placeholder="e.g. stripe.com"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  spellCheck={false}
+                  autoFocus
+                />
+                <button
+                  className="url-bar-submit"
+                  type="submit"
+                  disabled={!apiKey && !testMode}
+                  title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
+                >
+                  Teardown →
+                </button>
+              </form>
 
-          <div className="below-url-row">
-            <label className="test-mode-row">
-              <span className="toggle-switch">
-                <input type="checkbox" checked={testMode} onChange={toggleTestMode} />
-                <span className="toggle-track">
-                  <span className="toggle-thumb" />
-                </span>
-              </span>
-              Test mode (No API)
-            </label>
+              <div className="below-url-row">
+                <label className="test-mode-row">
+                  <span className="toggle-switch">
+                    <input type="checkbox" checked={testMode} onChange={toggleTestMode} />
+                    <span className="toggle-track">
+                      <span className="toggle-thumb" />
+                    </span>
+                  </span>
+                  Test mode (No API)
+                </label>
 
-            {teardownStatus === "idle" && (
-              <div className="examples">
-                <span>Try:</span>
-                {EXAMPLES.map((ex) => (
-                  <button
-                    key={ex.url}
-                    type="button"
-                    className="example-chip"
-                    style={{ "--chip-color": ex.color }}
-                    disabled={!apiKey && !testMode}
-                    title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
-                    onClick={() => {
-                      setInput(ex.url);
-                      runTeardown(ex.url);
-                    }}
-                  >
-                    {ex.url}
-                  </button>
-                ))}
+                {teardownStatus === "idle" && (
+                  <div className="examples">
+                    <span>Try:</span>
+                    {EXAMPLES.map((ex) => (
+                      <button
+                        key={ex.url}
+                        type="button"
+                        className="example-chip"
+                        style={{ "--chip-color": ex.color }}
+                        disabled={!apiKey && !testMode}
+                        title={apiKey || testMode ? undefined : "Add an API key above, or enable test mode"}
+                        onClick={() => {
+                          setInput(ex.url);
+                          runTeardown(ex.url);
+                        }}
+                      >
+                        {ex.url}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {teardownStatus === "error" && (
-            <div className="banner banner--error panel">
-              <strong>Couldn't complete the teardown.</strong> {teardownError}
-            </div>
+              {teardownStatus === "error" && (
+                <div className="banner banner--error panel">
+                  <strong>Couldn't complete the teardown.</strong> {teardownError}
+                </div>
+              )}
+            </>
           )}
-
-          {teardownStatus === "loading" && <LoadingTips />}
         </div>
       )}
     </div>

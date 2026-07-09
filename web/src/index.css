@@ -1,50 +1,43 @@
-/* Design system: warm cream "old book" paper base — a student's textbook,
-   not a blank white app. A bold marker-yellow accent stands in for a
-   highlighter pen; a five-color "Boggle" palette (see App.jsx's
-   CRITERION_COLORS) gives each of the five teardown criteria its own
-   identity. Every color re-verified against WCAG AA on the actual cream
-   background (not white — cream's lower luminance pushed two colors below
-   4.5:1 that passed on white, and pure yellow fails as text/outline
-   entirely, which is why it's fill-only — see color-systems.md). Sans-serif
-   body (Inter) + Instrument Serif display, hairline sepia borders. */
+/* Design system: clean, light, Apple-like — a white/light-gray surface
+   system, near-black ink, and Apple's own production blue as the one
+   accent, instead of a themed paper/highlighter concept. A five-color
+   "Boggle" palette (see App.jsx's CRITERION_COLORS) still gives each of
+   the five teardown criteria its own identity within that otherwise
+   restrained base. Every color re-verified against WCAG AA on the actual
+   backgrounds below. San Francisco where available (-apple-system), Inter
+   as the web fallback — no serif anywhere. */
 :root {
-  /* Surfaces — layered cream, each step a little more "aged" */
-  --bg: #fbf4e4;
-  --surface: #f3e9d2;
-  --surface-2: #eadfc0;
-  --border: rgba(90, 66, 30, 0.18);
-  --border-strong: rgba(90, 66, 30, 0.32);
+  /* Surfaces — white cards on Apple's signature light-gray page background */
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #e8e8ed;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.14);
 
-  /* Ink / text — warm sepia-black, not pure black */
-  --ink: #2b2013;
-  --ink-soft: rgba(43, 32, 19, 0.68);
-  --ink-faint: rgba(43, 32, 19, 0.45);
+  /* Ink / text — Apple's actual near-black, not pure #000 */
+  --ink: #1d1d1f;
+  --ink-soft: rgba(29, 29, 31, 0.68);
+  --ink-faint: rgba(29, 29, 31, 0.45);
 
-  /* Inverted controls (dark-on-cream, used for low-emphasis toggles) */
-  --invert-bg: #2b2013;
-  --invert-ink: #fbf4e4;
+  /* Inverted controls (dark-on-light, used for low-emphasis toggles) */
+  --invert-bg: #1d1d1f;
+  --invert-ink: #ffffff;
 
-  /* Primary accent — an aged-gold marker tone, softer than a raw highlighter
-     yellow (which read as too bright/loud). Two steps with two different
-     jobs, not two lightnesses of the same job: --accent is fill-only,
-     always paired with dark ink text/icons on top. --accent-strong is the
-     text/link/border/focus-ring color, and doubles as a hover fill — but a
-     hover fill this dark needs light (--invert-ink) text on top, not dark
-     ink; see App.css usages. */
-  --accent: #d9a441; /* fill-only — ink text on it is 7.1:1 */
-  --accent-strong: #8a5f1e; /* text/links/focus — 5.1:1 on cream; invert-ink on it is 5.1:1 */
-  --accent-soft: rgba(217, 164, 65, 0.2); /* literal highlighter-marker wash */
+  /* Primary accent — Apple's own production blue. One color, one job
+     everywhere it appears (buttons, links, focus rings, active states) —
+     no two-step fill/text split needed here since white text on it and
+     the blue as text-on-white both clear 4.5:1 on their own. */
+  --accent: #0071e3; /* 4.7:1 on white, symmetric with white text on it */
+  --accent-strong: #0058b0; /* hover/press — 6.95:1 */
+  --accent-soft: rgba(0, 113, 227, 0.1);
 
-  /* Semantic — status only, never reused decoratively. Re-verified on the
-     cream background specifically (danger and the boggle "friction" color
-     both needed to darken slightly from their white-background values to
-     hold 4.5:1 on cream's lower luminance). */
+  /* Semantic — status only, never reused decoratively. */
   --success: #15803d;
-  --success-soft: rgba(21, 128, 61, 0.12);
+  --success-soft: rgba(21, 128, 61, 0.1);
   --warning: #b45309;
-  --warning-soft: rgba(180, 83, 9, 0.12);
+  --warning-soft: rgba(180, 83, 9, 0.1);
   --danger: #b71c1c;
-  --danger-soft: rgba(183, 28, 28, 0.12);
+  --danger-soft: rgba(183, 28, 28, 0.1);
 
   /* Spacing (4px base) */
   --space-1: 4px;
@@ -68,12 +61,14 @@
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(0, 0, 0, 0.03);
 
-  /* Instrument Serif carries the one big headline moment — a single
-     characterful accent, not a whole-page "book" typesetting exercise.
-     Everything else, including reading-length copy, stays Inter; too much
-     serif reads as trying too hard rather than as considered restraint. */
-  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  /* One family, two roles — the actual Apple approach: SF Pro Display and
+     SF Pro Text are optical sizes of the same typeface, not different
+     families, so display and body just differ in size/weight here, not in
+     face. -apple-system/BlinkMacSystemFont render as real San Francisco on
+     macOS/iOS; Inter is the closest web fallback everywhere else. No serif
+     anywhere — one clean sans throughout. */
+  --font-display: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* Apple-style spring easing — a slight overshoot on the way in, used for
@@ -100,12 +95,6 @@ body {
 
 body {
   background: var(--bg);
-  /* Light dot-grid texture — a faint, evenly-spaced radial-dot pattern
-     rather than a flat fill, so the background reads as textured paper
-     instead of a blank white void. Low enough contrast to disappear at a
-     glance; only visible as texture on close look. */
-  background-image: radial-gradient(rgba(90, 66, 30, 0.12) 1px, transparent 1px);
-  background-size: 22px 22px;
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -114,6 +103,8 @@ body {
 
 #root {
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
 }
 
 a {
@@ -134,15 +125,12 @@ button {
 }
 
 ::selection {
-  /* Literal highlighter-marker effect — yellow wash, dark ink text on top. */
   background: var(--accent);
-  color: var(--ink);
+  color: #fff;
 }
 
 :focus-visible {
-  /* Bright --accent yellow fails even the 3:1 UI-component contrast
-     minimum as an outline on cream — the darker gold clears it easily. */
-  outline: 2px solid var(--accent-strong);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -180,24 +168,6 @@ button {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* Restrained ambient glow — a soft, low-opacity radial wash behind a hero
-   element for a touch of depth. Contained within its own box (no bleed past
-   the viewport) so it can never cause horizontal overflow. */
-.accent-glow {
-  position: relative;
-  overflow: hidden;
-}
-
-.accent-glow::before {
-  content: "";
-  position: absolute;
-  inset: -80px 0 auto 0;
-  height: 320px;
-  background: radial-gradient(ellipse at center, var(--accent-soft) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: -1;
 }
 
 @media (prefers-reduced-motion: reduce) {
