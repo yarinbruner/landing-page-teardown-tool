@@ -35,12 +35,11 @@ function ChevronIcon({ up }) {
 // The findings list is the one region allowed to run out of room (LLM
 // finding count/length is unbounded) — but instead of growing the box to
 // reveal more (which pushed into the fix box below it), the box stays a
-// constant size forever. Clicking the arrow smoothly scrolls the list to
-// the next finding — a native scrollTo with behavior:"smooth" gives the
-// slide-down animation; overflow:hidden still allows this programmatic
-// scroll while hiding the scrollbar, so nothing but the finding lines
-// themselves ever moves. Reaching the end flips the arrow to point up
-// (a click from there loops back to the top).
+// constant size forever. Clicking the arrow jumps the list to the next
+// finding — overflow:hidden still allows this programmatic scroll while
+// hiding the scrollbar, so nothing but the finding lines themselves ever
+// moves. Reaching the end flips the arrow to point up (a click from
+// there loops back to the top).
 function Findings({ findings }) {
   const [overflowing, setOverflowing] = useState(false);
   const [atEnd, setAtEnd] = useState(false);
@@ -59,7 +58,7 @@ function Findings({ findings }) {
     const maxScroll = el.scrollHeight - el.clientHeight;
     if (maxScroll <= 1) return;
     if (el.scrollTop >= maxScroll - 1) {
-      el.scrollTo({ top: 0, behavior: "smooth" });
+      el.scrollTo({ top: 0 });
       setAtEnd(false);
       return;
     }
@@ -72,7 +71,7 @@ function Findings({ findings }) {
       }
     }
     const target = Math.min(nextTop, maxScroll);
-    el.scrollTo({ top: target, behavior: "smooth" });
+    el.scrollTo({ top: target });
     setAtEnd(target >= maxScroll - 1);
   }
 

@@ -11,17 +11,15 @@
 }
 
 /* ---------------------------------------------------------------------- */
-/* Screen transitions — the input form and the report are two distinct     */
-/* "screens" that swap (not stack/scroll). Each mount gets a short fade +  */
-/* rise so the swap reads as a deliberate transition, not a jump cut.      */
-/* Input screen sizes to its (deliberately short, vh-clamped) content and  */
-/* sits centered in .page; report screen fills .page exactly and manages  */
-/* its own internal fit — see the report-grid rules below.                */
+/* Screens — the input form and the report are two distinct "screens"      */
+/* that swap (not stack/scroll). Input screen sizes to its (deliberately   */
+/* short, vh-clamped) content and sits centered in .page; report screen    */
+/* fills .page exactly and manages its own internal fit — see the         */
+/* report-grid rules below.                                                */
 /* ---------------------------------------------------------------------- */
 
 .screen {
   width: 100%;
-  animation: screen-in 0.4s var(--ease-spring) both;
 }
 
 .screen--report {
@@ -30,17 +28,6 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-@keyframes screen-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.99);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 .back-button {
@@ -56,16 +43,10 @@
   font-weight: 600;
   cursor: pointer;
   flex-shrink: 0;
-  transition: color 0.15s ease, transform 0.3s var(--ease-spring);
 }
 
 .back-button:hover {
   color: var(--ink);
-  transform: translateX(-2px);
-}
-
-.back-button:active {
-  transform: translateX(-2px) scale(0.95);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -143,15 +124,10 @@
   color: var(--ink);
   font-size: 13px;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.3s var(--ease-spring);
 }
 
 .model-picker-trigger:hover {
   border-color: var(--border-strong);
-}
-
-.model-picker-trigger:active {
-  transform: scale(0.97);
 }
 
 .model-picker-provider {
@@ -172,6 +148,7 @@
   position: absolute;
   top: calc(100% + var(--space-2));
   left: 50%;
+  transform: translateX(-50%);
   z-index: 20;
   width: 260px;
   /* Never extend past the bottom of the viewport (behind the dock, off
@@ -180,19 +157,6 @@
   overflow-y: auto;
   padding: var(--space-2);
   text-align: left;
-  transform-origin: top center;
-  animation: popover-in 0.35s var(--ease-spring) both;
-}
-
-@keyframes popover-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-6px) scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
 }
 
 .model-picker-providers {
@@ -216,7 +180,6 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .model-picker-provider-tab--active {
@@ -243,7 +206,6 @@
   font-size: 13px;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .model-picker-option:hover {
@@ -285,15 +247,10 @@
   color: var(--ink-soft);
   font-size: 13px;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.3s var(--ease-spring);
 }
 
 .api-key-trigger:hover {
   border-color: var(--border-strong);
-}
-
-.api-key-trigger:active {
-  transform: scale(0.97);
 }
 
 .api-key-trigger--set {
@@ -316,14 +273,13 @@
   position: absolute;
   top: calc(100% + var(--space-2));
   left: 50%;
+  transform: translateX(-50%);
   z-index: 20;
   width: 280px;
   max-height: min(360px, calc(100vh - var(--space-8)));
   overflow-y: auto;
   padding: var(--space-4);
   text-align: left;
-  transform-origin: top center;
-  animation: popover-in 0.35s var(--ease-spring) both;
 }
 
 .api-key-popover-body p {
@@ -346,7 +302,6 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: color 0.15s ease;
 }
 
 .api-key-link:hover {
@@ -390,12 +345,6 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.3s var(--ease-spring);
-}
-
-.api-key-save:active,
-.api-key-cancel:active {
-  transform: scale(0.96);
 }
 
 .api-key-save {
@@ -430,7 +379,6 @@
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
   margin: 0 auto clamp(8px, 2vh, 16px);
   max-width: 640px;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* Focus goes on the whole bar, not a hard rectangle around just the text
@@ -479,15 +427,10 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, transform 0.3s var(--ease-spring);
 }
 
 .url-bar-submit:hover:not(:disabled) {
   background: var(--accent-strong);
-}
-
-.url-bar-submit:active:not(:disabled) {
-  transform: scale(0.97);
 }
 
 .url-bar-submit:disabled {
@@ -534,7 +477,6 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease;
 }
 
 .example-chip:hover:not(:disabled) {
@@ -561,7 +503,6 @@
   font-size: 13px;
   color: var(--ink-faint);
   cursor: pointer;
-  transition: color 0.15s ease;
 }
 
 .test-mode-row:hover {
@@ -593,7 +534,6 @@
   inset: 0;
   background: var(--border-strong);
   border-radius: var(--radius-full);
-  transition: background-color 0.25s var(--ease-spring);
 }
 
 .toggle-thumb {
@@ -605,7 +545,6 @@
   border-radius: var(--radius-full);
   background: var(--bg);
   box-shadow: 0 1px 3px rgba(43, 32, 19, 0.35);
-  transition: transform 0.25s var(--ease-spring);
 }
 
 .toggle-switch input:checked ~ .toggle-track {
@@ -694,7 +633,6 @@
   height: 100%;
   border-radius: var(--radius-full);
   background: var(--accent);
-  transition: width 0.3s var(--ease-spring);
 }
 
 .loading-percent {
@@ -711,22 +649,6 @@
   font-size: 14px;
   color: var(--ink-soft);
   text-align: center;
-  animation: fade-in 0.3s ease;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .loading-status {
-    animation: none;
-  }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -818,9 +740,9 @@
 }
 
 /* Fixed-size box — never grows. The arrow (rendered only when the
-   verdict text actually overflows) pages through it via smooth scroll,
-   the same pattern as the findings list, instead of shrinking type size
-   to try to fit every possible verdict length. */
+   verdict text actually overflows) pages through it via scrollTo, the
+   same pattern as the findings list, instead of shrinking type size to
+   try to fit every possible verdict length. */
 .score-head-verdict-wrap {
   display: flex;
   align-items: flex-end;
@@ -834,7 +756,6 @@
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  scroll-behavior: smooth;
 }
 
 .score-head-verdict-toggle {
@@ -849,7 +770,6 @@
   background: var(--surface);
   color: var(--ink-faint);
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .score-head-verdict-toggle:hover {
@@ -860,7 +780,6 @@
 
 .score-head-verdict-toggle .chevron {
   display: block;
-  transition: transform 0.3s var(--ease-spring);
 }
 
 .score-head-verdict-toggle .chevron--up {
@@ -920,28 +839,10 @@
   position: absolute;
   top: 0;
   left: 0;
-  animation: stamp-in 0.5s var(--ease-spring) both;
-}
-
-@keyframes stamp-in {
-  from {
-    opacity: 0;
-    stroke-dashoffset: var(--circumference, 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stamp-ring {
-    animation: none;
-  }
 }
 
 .stamp-ring-track {
   stroke: var(--surface-2);
-}
-
-.stamp-ring-fill {
-  transition: stroke-dashoffset 0.5s var(--ease-spring);
 }
 
 .stamp-score {
@@ -1044,10 +945,9 @@
 
 /* One segmented toggle track, living inside the card, centered and
    pinned to the bottom via margin-top:auto — it never moves, even when
-   the findings list above it is expanded/scrolled (see
-   .criterion-findings--expanded). The name is available as a
-   tooltip/aria-label plus, for whichever tab is active, spelled out in
-   the card's own title above. */
+   the findings list above it is paged (see .criterion-findings). The
+   name is available as a tooltip/aria-label plus, for whichever tab is
+   active, spelled out in the card's own title above. */
 .criteria-tabs {
   display: flex;
   align-self: center;
@@ -1070,7 +970,6 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  transition: background-color 0.2s var(--ease-spring), transform 0.3s var(--ease-spring);
 }
 
 .criteria-tab-dot {
@@ -1078,15 +977,10 @@
   height: 11px;
   border-radius: var(--radius-full);
   background: var(--tab-color, var(--accent-strong));
-  transition: transform 0.2s var(--ease-spring);
 }
 
 .criteria-tab:hover {
   background: rgba(0, 0, 0, 0.04);
-}
-
-.criteria-tab:active {
-  transform: scale(0.94);
 }
 
 .criteria-tab--active {
@@ -1094,30 +988,14 @@
   box-shadow: var(--shadow-sm);
 }
 
-.criteria-tab--active .criteria-tab-dot {
-  transform: scale(1.15);
-}
-
 .criterion-card {
   padding: var(--space-3) var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  animation: card-in 0.4s var(--ease-spring) both;
   flex: 1;
   min-height: 0;
   overflow: hidden;
-}
-
-@keyframes card-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .criterion-card-head {
@@ -1155,7 +1033,6 @@
   height: 100%;
   border-radius: var(--radius-full);
   background: var(--criterion-color, var(--accent-strong));
-  transition: width 0.4s var(--ease-spring);
 }
 
 /* The one region allowed to actually run out of room — findings text
@@ -1163,10 +1040,10 @@
    shrink once everything around it is already flex-shrink:0. A light
    outline makes it read as its own bounded box within the card. This box
    NEVER resizes — clicking the arrow below (rendered only when content
-   is actually truncated — see the Findings component) smoothly scrolls
-   its contents to the next finding instead of growing the box, so
-   nothing around it — the card, its head, the fix box, the tabs — ever
-   moves or gets pushed. */
+   is actually truncated — see the Findings component) scrolls its
+   contents to the next finding instead of growing the box, so nothing
+   around it — the card, its head, the fix box, the tabs — ever moves or
+   gets pushed. */
 .criterion-findings-wrap {
   display: flex;
   flex-direction: column;
@@ -1189,10 +1066,6 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  /* Still scrollable via JS (scrollTo) even with overflow:hidden — this
-     just keeps the scrollbar itself invisible; the smooth "next finding"
-     animation comes from behavior:"smooth" in the Findings component. */
-  scroll-behavior: smooth;
 }
 
 /* A long, light-outline pill holding just a chevron — centered under the
@@ -1211,7 +1084,6 @@
   background: var(--surface);
   color: var(--ink-faint);
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .criterion-findings-toggle:hover {
@@ -1222,7 +1094,6 @@
 
 .criterion-findings-toggle .chevron {
   display: block;
-  transition: transform 0.3s var(--ease-spring);
 }
 
 .criterion-findings-toggle .chevron--up {

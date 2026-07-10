@@ -13,7 +13,7 @@ function ChevronIcon({ up }) {
 // text — rather than shrinking the font to fit every possible length (a
 // losing game), it gets a fixed-size box with an arrow that only appears
 // when the text actually overflows, paging through it a screenful at a
-// time via smooth scroll instead of resizing the box.
+// time instead of resizing the box.
 export default function ScoreHead({ overall, overallVerdict }) {
   const [overflowing, setOverflowing] = useState(false);
   const [atEnd, setAtEnd] = useState(false);
@@ -32,12 +32,12 @@ export default function ScoreHead({ overall, overallVerdict }) {
     const maxScroll = el.scrollHeight - el.clientHeight;
     if (maxScroll <= 1) return;
     if (el.scrollTop >= maxScroll - 1) {
-      el.scrollTo({ top: 0, behavior: "smooth" });
+      el.scrollTo({ top: 0 });
       setAtEnd(false);
       return;
     }
     const target = Math.min(el.scrollTop + el.clientHeight, maxScroll);
-    el.scrollTo({ top: target, behavior: "smooth" });
+    el.scrollTo({ top: target });
     setAtEnd(target >= maxScroll - 1);
   }
 
