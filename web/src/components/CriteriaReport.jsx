@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { CRITERIA_COLORS, CRITERIA_LABELS } from "../criteriaMeta.js";
 import CriteriaTabs from "./CriteriaTabs.jsx";
 
-const EXPANDED_CAP_PX = 220;
-
 function ScoreBar({ percent }) {
   // Uses the criterion's own color (inherited via --criterion-color from
   // the parent .criterion-card) rather than a separate success/warning/
@@ -26,69 +24,55 @@ function RatingPips({ value }) {
   );
 }
 
-function ChevronIcon({ up }) {
+function ChevronIcon() {
   return (
-    <svg
-      className={`chevron ${up ? "chevron--up" : ""}`}
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      aria-hidden="true"
-    >
+    <svg className="chevron" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
       <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   );
 }
 
 // The findings list is the one region allowed to run out of room (LLM
-// finding count/length is unbounded). Instead of always silently clipping,
-// detect the clip and offer an explicit expand toggle. Clicking it
-// animates the list's own height open (measured via scrollHeight, capped
-// at EXPANDED_CAP_PX) and, only past that cap, the list itself scrolls
-// internally — the toggle button lives outside the scrolling <ul>, and
-// everything else in the card (head, tabs, the fix box) never moves.
-function Findings({ findings, expanded, onToggleExpanded }) {
+// finding count/length is unbounded) — but instead of growing the box to
+// reveal more (which pushed into the fix box below it), the box stays a
+// constant size forever. Clicking the arrow smoothly scrolls the list to
+// the next finding — a native scrollTo with behavior:"smooth" gives the
+// slide-down animation; overflow:hidden still allows this programmatic
+// scroll while hiding the scrollbar, so nothing but the finding lines
+// themselves ever moves. Reaching the end loops back to the top.
+function Findings({ findings }) {
   const [overflowing, setOverflowing] = useState(false);
   const listRef = useRef(null);
-  const collapsedHeightRef = useRef(null);
-  const [animHeight, setAnimHeight] = useState(null);
 
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
-    if (collapsedHeightRef.current == null) {
-      collapsedHeightRef.current = el.clientHeight;
-    }
     setOverflowing(el.scrollHeight > el.clientHeight + 1);
   }, [findings]);
 
-  function handleToggle() {
+  function handleAdvance() {
     const el = listRef.current;
-    if (!el) {
-      onToggleExpanded();
+    if (!el) return;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    if (maxScroll <= 1) return;
+    if (el.scrollTop >= maxScroll - 1) {
+      el.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    if (!expanded) {
-      const target = Math.min(el.scrollHeight, EXPANDED_CAP_PX);
-      setAnimHeight(el.clientHeight);
-      requestAnimationFrame(() => setAnimHeight(target));
-    } else {
-      setAnimHeight(el.clientHeight);
-      requestAnimationFrame(() => setAnimHeight(collapsedHeightRef.current));
+    const items = el.querySelectorAll("li");
+    let nextTop = maxScroll;
+    for (const li of items) {
+      if (li.offsetTop > el.scrollTop + 1) {
+        nextTop = li.offsetTop;
+        break;
+      }
     }
-    onToggleExpanded();
+    el.scrollTo({ top: Math.min(nextTop, maxScroll), behavior: "smooth" });
   }
 
   return (
     <div className="criterion-findings-wrap">
-      <ul
-        ref={listRef}
-        className={`criterion-findings ${expanded ? "criterion-findings--expanded" : ""}`}
-        style={animHeight != null ? { maxHeight: animHeight } : undefined}
-        onTransitionEnd={() => {
-          if (!expanded) setAnimHeight(null);
-        }}
-      >
+      <ul ref={listRef} className="criterion-findings">
         {findings.map((f, i) => (
           <li key={i}>
             <span className="finding-index">{i + 1}</span>
@@ -97,15 +81,9 @@ function Findings({ findings, expanded, onToggleExpanded }) {
           </li>
         ))}
       </ul>
-      {(overflowing || expanded) && (
-        <button
-          type="button"
-          className="criterion-findings-toggle"
-          onClick={handleToggle}
-          aria-expanded={expanded}
-          aria-label={expanded ? "Show fewer findings" : "Show more findings"}
-        >
-          <ChevronIcon up={expanded} />
+      {overflowing && (
+        <button type="button" className="criterion-findings-toggle" onClick={handleAdvance} aria-label="Show next finding">
+          <ChevronIcon />
         </button>
       )}
     </div>
@@ -115,12 +93,6 @@ function Findings({ findings, expanded, onToggleExpanded }) {
 export default function CriteriaReport({ teardown, activeKey, onSelectCriterion }) {
   const { criteria, highestLeverageFix } = teardown;
   const active = criteria[activeKey];
-  const [findingsExpanded, setFindingsExpanded] = useState(false);
-
-  function selectCriterion(key) {
-    setFindingsExpanded(false);
-    onSelectCriterion(key);
-  }
 
   return (
     <div className="criteria-report">
@@ -137,18 +109,14 @@ export default function CriteriaReport({ teardown, activeKey, onSelectCriterion 
           </header>
           <ScoreBar percent={active.barPercent} />
 
-          <Findings
-            findings={active.findings}
-            expanded={findingsExpanded}
-            onToggleExpanded={() => setFindingsExpanded((v) => !v)}
-          />
+          <Findings findings={active.findings} />
 
           <div className="criterion-fix">
             <span className="criterion-fix-label">Change this</span>
             <p>{active.whatToChange}</p>
           </div>
 
-          <CriteriaTabs activeKey={activeKey} onChange={selectCriterion} />
+          <CriteriaTabs activeKey={activeKey} onChange={onSelectCriterion} />
         </div>
       )}
     </div>
