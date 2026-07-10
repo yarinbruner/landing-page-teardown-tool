@@ -106,23 +106,23 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-size: 11px 11px;
+  background-size: 18px 18px;
 }
 
 .bg-dots--lg {
-  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.32) 1.6px, transparent 1.6px);
+  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.18) 2.6px, transparent 2.6px);
   mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 30%);
   -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 30%);
 }
 
 .bg-dots--md {
-  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.22) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.12) 1.7px, transparent 1.7px);
   mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 55%);
   -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 55%);
 }
 
 .bg-dots--sm {
-  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.14) 0.6px, transparent 0.6px);
+  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.08) 1px, transparent 1px);
   mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 80%);
   -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 80%);
 }
