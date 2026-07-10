@@ -869,6 +869,7 @@
   min-width: 0;
   height: 100%;
   overflow: hidden;
+  scroll-behavior: smooth;
 }
 
 .score-head-verdict-toggle {
@@ -1227,6 +1228,11 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  /* Pressing the arrow scrolls this list to the next finding via JS
+     (scrollTo) — scroll-behavior:smooth turns that into a soft glide
+     instead of an instant jump, still with the scrollbar itself hidden
+     by overflow:hidden above. */
+  scroll-behavior: smooth;
 }
 
 /* A long, light-outline pill holding just a chevron — centered under the
