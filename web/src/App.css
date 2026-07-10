@@ -75,10 +75,56 @@
 /* ---------------------------------------------------------------------- */
 
 .masthead {
+  position: relative;
   text-align: center;
   /* vh-based, not a fixed token — shrinks smoothly on short viewports
      instead of relying on a single breakpoint to catch the extreme case. */
   margin-bottom: clamp(16px, 5vh, 48px);
+}
+
+/* Real text content wrapped in its own positioned box so it reliably
+   paints above .bg-dots below — both land in the same "positioned,
+   auto z-index" stacking bucket this way, so DOM order decides, and
+   this wrapper comes after the dots in the markup. See the .bg-dots
+   comment for why position (not z-index) is what does the work here. */
+.masthead-content {
+  position: relative;
+}
+
+/* Halftone dot-grid texture — confined to the masthead only (it's the
+   header's own texture, not a whole-page background), sized to exactly
+   the masthead's box via inset:0 on a position:relative parent. Small,
+   tight grid and a faint blue tint so it reads as a nuanced surface
+   texture rather than a graphic — three same-position dot grids at
+   different fixed sizes, each masked to a different fade radius, so
+   the layering creates a shrinking-dot illusion (denser at the
+   masthead's center, dissolving toward its edges) with no external
+   image. pointer-events:none so it never intercepts clicks; needs no
+   z-index — see .masthead-content above for how paint order is kept
+   correct without one. */
+.bg-dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-size: 11px 11px;
+}
+
+.bg-dots--lg {
+  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.32) 1.6px, transparent 1.6px);
+  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 30%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 30%);
+}
+
+.bg-dots--md {
+  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.22) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 55%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 55%);
+}
+
+.bg-dots--sm {
+  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.14) 0.6px, transparent 0.6px);
+  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 80%);
 }
 
 .masthead-eyebrow {

@@ -184,12 +184,17 @@ export default function App() {
       ) : (
         <div className="screen" key="input">
           <header className="masthead">
-            <div className="masthead-eyebrow">Landing Page Teardown</div>
-            <h1 className="masthead-title">Score the pitch, not just the paint.</h1>
-            <p className="masthead-sub">
-              Drop in a URL. Claude or OpenAI runs it through an industry-standard conversion teardown — message
-              &amp; value prop, call to action, trust, friction, and urgency — using your own API key.
-            </p>
+            <div className="bg-dots bg-dots--lg" aria-hidden="true" />
+            <div className="bg-dots bg-dots--md" aria-hidden="true" />
+            <div className="bg-dots bg-dots--sm" aria-hidden="true" />
+            <div className="masthead-content">
+              <div className="masthead-eyebrow">Landing Page Teardown</div>
+              <h1 className="masthead-title">Score the pitch, not just the paint.</h1>
+              <p className="masthead-sub">
+                Drop in a URL. Claude or OpenAI runs it through an industry-standard conversion teardown — message
+                &amp; value prop, call to action, trust, friction, and urgency — using your own API key.
+              </p>
+            </div>
           </header>
 
           <div className="settings-row">
