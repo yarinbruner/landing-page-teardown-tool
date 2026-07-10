@@ -817,6 +817,56 @@
   margin-bottom: 0;
 }
 
+/* Fixed-size box — never grows. The arrow (rendered only when the
+   verdict text actually overflows) pages through it via smooth scroll,
+   the same pattern as the findings list, instead of shrinking type size
+   to try to fit every possible verdict length. */
+.score-head-verdict-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  flex: 1;
+  min-height: 0;
+}
+
+.score-head-verdict-wrap .criteria-overall-verdict {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  scroll-behavior: smooth;
+}
+
+.score-head-verdict-toggle {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.score-head-verdict-toggle:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+}
+
+.score-head-verdict-toggle .chevron {
+  display: block;
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.score-head-verdict-toggle .chevron--up {
+  transform: rotate(180deg);
+}
+
 /* The one deliberate exception to the rest of the app's zero-scroll rule:
    shrinking the full-page screenshot down to fit its column (object-fit:
    contain) made it too small to actually read. Letting this one pane
@@ -951,8 +1001,8 @@
 
 .criteria-overall-verdict {
   margin: 0;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.45;
   color: var(--ink);
   font-weight: 500;
 }
