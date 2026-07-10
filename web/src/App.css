@@ -767,7 +767,7 @@
    side-by-side columns still fit in one screen; a stacked layout wouldn't. */
 .report-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   gap: var(--space-4);
   flex: 1;
   min-height: 0;
@@ -788,14 +788,18 @@
   gap: var(--space-2);
 }
 
+/* Padding matches .shot-frame's exactly (var(--space-3) on both) — with
+   flex:1 on both and box-sizing:border-box, mismatched padding was enough
+   to break the intended 50/50 height split between this and the
+   screenshot below it, so they're kept in lockstep on purpose. */
 .score-head {
   flex: 1;
   min-height: 0;
   overflow: hidden;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-4);
-  padding: var(--space-4);
+  padding: var(--space-3);
 }
 
 .score-head-meta {
@@ -820,7 +824,7 @@
 .shot-frame {
   flex: 1;
   min-height: 0;
-  padding: var(--space-2);
+  padding: var(--space-3);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -1110,17 +1114,20 @@
 
 /* The one region allowed to actually run out of room — findings text
    length is LLM-generated and unbounded, and there is nowhere left to
-   shrink once everything around it is already flex-shrink:0. Clipped by
-   default; a "Show more" toggle (rendered only when content is actually
-   truncated — see the Findings component) switches it to its own internal
-   scroll, the same opt-in exception already granted to the screenshot
-   pane, instead of a permanent silent clip. */
+   shrink once everything around it is already flex-shrink:0. A light
+   outline makes it read as its own bounded box within the card. Clipped
+   by default; the pill toggle below (rendered only when content is
+   actually truncated — see the Findings component) animates it open. */
 .criterion-findings-wrap {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 48px;
-  gap: var(--space-1);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  corner-shape: squircle;
 }
 
 .criterion-findings {
@@ -1133,41 +1140,52 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  /* Height is driven by an inline max-height (see the Findings component,
+     which measures scrollHeight via JS) so opening/closing animates
+     smoothly to its exact content height instead of jumping. */
+  transition: max-height 0.35s var(--ease-spring);
 }
 
-/* Expanded: stop clipping and let the list take its full natural height —
-   .criterion-card--scrollable (set alongside this) is what actually makes
-   the extra content reachable, by letting the whole card scroll. */
+/* Expanded: hug the list's own (now animated-to-full) height instead of
+   stretching to fill the card — .criterion-card--scrollable (set
+   alongside this) is what makes any still-unfit content reachable, by
+   letting the whole card scroll. */
 .criterion-findings--expanded {
   flex: none;
-  overflow: visible;
 }
 
 .criterion-findings-wrap:has(.criterion-findings--expanded) {
   flex: none;
 }
 
-/* Left-aligned under the findings text, not centered — the findings list
-   itself is visually asymmetric (text column on the left, rating pips on
-   the right), so a centered toggle read as oddly offset. */
+/* A long, light-outline pill holding just a chevron — centered under the
+   findings box rather than a left-aligned text link. */
 .criterion-findings-toggle {
   flex-shrink: 0;
-  align-self: flex-start;
+  align-self: center;
+  width: 64px;
+  height: 22px;
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px var(--space-2);
-  border: none;
-  background: none;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
   color: var(--criterion-color, var(--accent-strong));
-  font-size: 12px;
-  font-weight: 600;
   cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.criterion-findings-toggle:hover {
+  border-color: var(--criterion-color, var(--border-strong));
+  background: color-mix(in srgb, var(--criterion-color, var(--accent-strong)) 8%, var(--surface));
 }
 
 .criterion-findings-toggle .chevron {
   display: inline-block;
-  transition: transform 0.2s var(--ease-spring);
+  font-size: 14px;
+  line-height: 1;
+  transition: transform 0.3s var(--ease-spring);
 }
 
 .criterion-findings-toggle .chevron--up {

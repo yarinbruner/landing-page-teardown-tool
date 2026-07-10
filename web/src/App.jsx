@@ -167,19 +167,18 @@ export default function App() {
           </div>
 
           <div className="report-grid">
-            <div className="shot-wrap">
-              <ScoreHead
-                overall={teardownResult.teardown.overall}
-                overallVerdict={teardownResult.teardown.overallVerdict}
-                providerLabel={PROVIDERS[teardownResult.provider]?.label || "Claude"}
-              />
-              <ScreenshotPane screenshotUrl={teardownResult.screenshots.full} />
-            </div>
             <CriteriaReport
               teardown={teardownResult.teardown}
               activeKey={activeCriterion}
               onSelectCriterion={setActiveCriterion}
             />
+            <div className="shot-wrap">
+              <ScoreHead
+                overall={teardownResult.teardown.overall}
+                overallVerdict={teardownResult.teardown.overallVerdict}
+              />
+              <ScreenshotPane screenshotUrl={teardownResult.screenshots.full} />
+            </div>
           </div>
         </div>
       ) : (

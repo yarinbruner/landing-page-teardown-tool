@@ -26,24 +26,54 @@ function RatingPips({ value }) {
 
 // The findings list is the one region allowed to run out of room (LLM
 // finding count/length is unbounded). Instead of always silently clipping,
-// detect the clip and offer an explicit "show more" toggle. Expanding
-// doesn't just flip on an easy-to-miss internal scrollbar within the same
-// box size — it hands the whole card its own scroll (see
-// .criterion-card--scrollable) so the extra content visibly grows into
-// view, the same exception already granted to the screenshot pane.
+// detect the clip and offer an explicit expand toggle. Clicking it
+// animates the list's own height from its collapsed size up to its full
+// content height (measured via scrollHeight, not guessed), so it visibly
+// grows/"slides down" instead of an easy-to-miss internal scrollbar
+// appearing inside an unchanged-size box. If the grown list still doesn't
+// fit the card, .criterion-card--scrollable hands the whole card its own
+// scroll — the same exception already granted to the screenshot pane.
 function Findings({ findings, expanded, onToggleExpanded }) {
   const [overflowing, setOverflowing] = useState(false);
   const listRef = useRef(null);
+  const collapsedHeightRef = useRef(null);
+  const [animHeight, setAnimHeight] = useState(null);
 
   useEffect(() => {
     const el = listRef.current;
-    if (!el || expanded) return;
+    if (!el) return;
+    if (collapsedHeightRef.current == null) {
+      collapsedHeightRef.current = el.clientHeight;
+    }
     setOverflowing(el.scrollHeight > el.clientHeight + 1);
-  }, [findings, expanded]);
+  }, [findings]);
+
+  function handleToggle() {
+    const el = listRef.current;
+    if (!el) {
+      onToggleExpanded();
+      return;
+    }
+    if (!expanded) {
+      setAnimHeight(el.clientHeight);
+      requestAnimationFrame(() => setAnimHeight(el.scrollHeight));
+    } else {
+      setAnimHeight(el.clientHeight);
+      requestAnimationFrame(() => setAnimHeight(collapsedHeightRef.current));
+    }
+    onToggleExpanded();
+  }
 
   return (
     <div className="criterion-findings-wrap">
-      <ul ref={listRef} className={`criterion-findings ${expanded ? "criterion-findings--expanded" : ""}`}>
+      <ul
+        ref={listRef}
+        className={`criterion-findings ${expanded ? "criterion-findings--expanded" : ""}`}
+        style={animHeight != null ? { maxHeight: animHeight } : undefined}
+        onTransitionEnd={() => {
+          if (!expanded) setAnimHeight(null);
+        }}
+      >
         {findings.map((f, i) => (
           <li key={i}>
             <p>{f.text}</p>
@@ -52,8 +82,13 @@ function Findings({ findings, expanded, onToggleExpanded }) {
         ))}
       </ul>
       {(overflowing || expanded) && (
-        <button type="button" className="criterion-findings-toggle" onClick={onToggleExpanded} aria-expanded={expanded}>
-          {expanded ? "Show less" : "Show more"}
+        <button
+          type="button"
+          className="criterion-findings-toggle"
+          onClick={handleToggle}
+          aria-expanded={expanded}
+          aria-label={expanded ? "Show fewer findings" : "Show more findings"}
+        >
           <span className={`chevron ${expanded ? "chevron--up" : ""}`} aria-hidden="true">
             ⌄
           </span>
