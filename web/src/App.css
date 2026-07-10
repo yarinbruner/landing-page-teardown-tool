@@ -20,6 +20,18 @@
 
 .screen {
   width: 100%;
+  animation: screen-in 300ms var(--ease-out-expo) both;
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .screen--report {
@@ -43,10 +55,19 @@
   font-weight: 600;
   cursor: pointer;
   flex-shrink: 0;
+  transform: translateY(0);
+  transition: color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
 }
 
 .back-button:hover {
   color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.back-button:active {
+  transform: scale(0.97);
+  transition-duration: 100ms;
+  transition-timing-function: var(--ease-out-quick);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -124,10 +145,19 @@
   color: var(--ink);
   font-size: 13px;
   cursor: pointer;
+  transform: translateY(0);
+  transition: border-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
 }
 
 .model-picker-trigger:hover {
   border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.model-picker-trigger:active {
+  transform: scale(0.97);
+  transition-duration: 100ms;
+  transition-timing-function: var(--ease-out-quick);
 }
 
 .model-picker-provider {
@@ -142,13 +172,18 @@
 .model-picker-chevron {
   color: var(--ink-faint);
   margin-left: 2px;
+  display: inline-block;
+  transition: transform 200ms var(--ease-out-expo);
+}
+
+.model-picker-trigger[aria-expanded="true"] .model-picker-chevron {
+  transform: rotate(180deg);
 }
 
 .model-picker-popover {
   position: absolute;
   top: calc(100% + var(--space-2));
   left: 50%;
-  transform: translateX(-50%);
   z-index: 20;
   width: 260px;
   /* Never extend past the bottom of the viewport (behind the dock, off
@@ -157,6 +192,19 @@
   overflow-y: auto;
   padding: var(--space-2);
   text-align: left;
+  transform-origin: top center;
+  animation: popover-in 200ms var(--ease-spring) both;
+}
+
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
 }
 
 .model-picker-providers {
@@ -180,6 +228,7 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo), box-shadow 150ms var(--ease-out-expo);
 }
 
 .model-picker-provider-tab--active {
@@ -206,6 +255,7 @@
   font-size: 13px;
   text-align: left;
   cursor: pointer;
+  transition: background-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo);
 }
 
 .model-picker-option:hover {
@@ -219,6 +269,12 @@
   border-radius: var(--radius-full);
   background: transparent;
   flex-shrink: 0;
+  transform: scale(1);
+  transition: background-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
+}
+
+.model-picker-option--active .model-picker-option-dot {
+  transform: scale(1.15);
 }
 
 .model-picker-option--active {
@@ -247,10 +303,19 @@
   color: var(--ink-soft);
   font-size: 13px;
   cursor: pointer;
+  transform: translateY(0);
+  transition: border-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
 }
 
 .api-key-trigger:hover {
   border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.api-key-trigger:active {
+  transform: scale(0.97);
+  transition-duration: 100ms;
+  transition-timing-function: var(--ease-out-quick);
 }
 
 .api-key-trigger--set {
@@ -263,6 +328,7 @@
   border-radius: var(--radius-full);
   background: var(--ink-faint);
   flex-shrink: 0;
+  transition: background-color 150ms var(--ease-out-expo);
 }
 
 .api-key-trigger-dot--set {
@@ -273,13 +339,14 @@
   position: absolute;
   top: calc(100% + var(--space-2));
   left: 50%;
-  transform: translateX(-50%);
   z-index: 20;
   width: 280px;
   max-height: min(360px, calc(100vh - var(--space-8)));
   overflow-y: auto;
   padding: var(--space-4);
   text-align: left;
+  transform-origin: top center;
+  animation: popover-in 200ms var(--ease-spring) both;
 }
 
 .api-key-popover-body p {
@@ -302,6 +369,7 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: color 150ms var(--ease-out-expo);
 }
 
 .api-key-link:hover {
@@ -325,6 +393,11 @@
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--ink);
+  transition: border-color 150ms var(--ease-out-expo);
+}
+
+.api-key-input:focus-visible {
+  border-color: var(--accent-strong);
 }
 
 .api-key-form-actions {
@@ -345,6 +418,20 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transform: translateY(0);
+  transition: background-color 150ms var(--ease-out-expo), border-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
+}
+
+.api-key-save:hover,
+.api-key-cancel:hover {
+  transform: translateY(-1px);
+}
+
+.api-key-save:active,
+.api-key-cancel:active {
+  transform: scale(0.97);
+  transition-duration: 100ms;
+  transition-timing-function: var(--ease-out-quick);
 }
 
 .api-key-save {
@@ -379,6 +466,7 @@
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
   margin: 0 auto clamp(8px, 2vh, 16px);
   max-width: 640px;
+  transition: background-color 150ms var(--ease-out-expo), box-shadow 150ms var(--ease-out-expo);
 }
 
 /* Focus goes on the whole bar, not a hard rectangle around just the text
@@ -427,10 +515,20 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  transform: translateY(0);
+  transition: background-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring), box-shadow 150ms var(--ease-out-expo);
 }
 
 .url-bar-submit:hover:not(:disabled) {
   background: var(--accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.url-bar-submit:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: 100ms;
+  transition-timing-function: var(--ease-out-quick);
 }
 
 .url-bar-submit:disabled {
@@ -477,6 +575,7 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: opacity 150ms var(--ease-out-expo);
 }
 
 .example-chip:hover:not(:disabled) {
@@ -503,6 +602,7 @@
   font-size: 13px;
   color: var(--ink-faint);
   cursor: pointer;
+  transition: color 150ms var(--ease-out-expo);
 }
 
 .test-mode-row:hover {
@@ -534,6 +634,7 @@
   inset: 0;
   background: var(--border-strong);
   border-radius: var(--radius-full);
+  transition: background-color 150ms var(--ease-out-expo);
 }
 
 .toggle-thumb {
@@ -545,6 +646,7 @@
   border-radius: var(--radius-full);
   background: var(--bg);
   box-shadow: 0 1px 3px rgba(43, 32, 19, 0.35);
+  transition: transform 200ms var(--ease-spring);
 }
 
 .toggle-switch input:checked ~ .toggle-track {
@@ -633,6 +735,7 @@
   height: 100%;
   border-radius: var(--radius-full);
   background: var(--accent);
+  transition: width 250ms var(--ease-out-expo);
 }
 
 .loading-percent {
@@ -649,6 +752,16 @@
   font-size: 14px;
   color: var(--ink-soft);
   text-align: center;
+  animation: fade-in 300ms var(--ease-out-expo);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -770,6 +883,7 @@
   background: var(--surface);
   color: var(--ink-faint);
   cursor: pointer;
+  transition: border-color 150ms var(--ease-out-expo), background-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo);
 }
 
 .score-head-verdict-toggle:hover {
@@ -778,8 +892,14 @@
   color: var(--ink-soft);
 }
 
+.score-head-verdict-toggle:active {
+  transform: scale(0.9);
+  transition: transform 100ms var(--ease-out-quick);
+}
+
 .score-head-verdict-toggle .chevron {
   display: block;
+  transition: transform 200ms var(--ease-spring);
 }
 
 .score-head-verdict-toggle .chevron--up {
@@ -833,6 +953,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: stamp-in 300ms var(--ease-spring) both;
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .stamp-ring {
@@ -843,6 +975,10 @@
 
 .stamp-ring-track {
   stroke: var(--surface-2);
+}
+
+.stamp-ring-fill {
+  transition: stroke-dashoffset 400ms var(--ease-out-expo);
 }
 
 .stamp-score {
@@ -970,6 +1106,7 @@
   border: none;
   background: transparent;
   cursor: pointer;
+  transition: background-color 150ms var(--ease-out-expo), box-shadow 150ms var(--ease-out-expo);
 }
 
 .criteria-tab-dot {
@@ -977,15 +1114,26 @@
   height: 11px;
   border-radius: var(--radius-full);
   background: var(--tab-color, var(--accent-strong));
+  transform: scale(1);
+  transition: transform 200ms var(--ease-spring);
 }
 
 .criteria-tab:hover {
   background: rgba(0, 0, 0, 0.04);
 }
 
+.criteria-tab:active {
+  transform: scale(0.9);
+  transition: transform 100ms var(--ease-out-quick);
+}
+
 .criteria-tab--active {
   background: var(--surface);
   box-shadow: var(--shadow-sm);
+}
+
+.criteria-tab--active .criteria-tab-dot {
+  transform: scale(1.15);
 }
 
 .criterion-card {
@@ -996,6 +1144,18 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  animation: card-in 250ms var(--ease-out-expo) both;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .criterion-card-head {
@@ -1033,6 +1193,7 @@
   height: 100%;
   border-radius: var(--radius-full);
   background: var(--criterion-color, var(--accent-strong));
+  transition: width 300ms var(--ease-out-expo);
 }
 
 /* The one region allowed to actually run out of room — findings text
@@ -1084,6 +1245,7 @@
   background: var(--surface);
   color: var(--ink-faint);
   cursor: pointer;
+  transition: border-color 150ms var(--ease-out-expo), background-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo);
 }
 
 .criterion-findings-toggle:hover {
@@ -1092,8 +1254,14 @@
   color: var(--ink-soft);
 }
 
+.criterion-findings-toggle:active {
+  transform: scale(0.95);
+  transition: transform 100ms var(--ease-out-quick);
+}
+
 .criterion-findings-toggle .chevron {
   display: block;
+  transition: transform 200ms var(--ease-spring);
 }
 
 .criterion-findings-toggle .chevron--up {
@@ -1104,6 +1272,39 @@
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
+  animation: finding-in 400ms var(--ease-out-expo) both;
+}
+
+@keyframes finding-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered settle, capped at 6 items / 300ms total so a long findings
+   list doesn't take forever to finish appearing. */
+.criterion-findings li:nth-child(1) {
+  animation-delay: 0ms;
+}
+.criterion-findings li:nth-child(2) {
+  animation-delay: 50ms;
+}
+.criterion-findings li:nth-child(3) {
+  animation-delay: 100ms;
+}
+.criterion-findings li:nth-child(4) {
+  animation-delay: 150ms;
+}
+.criterion-findings li:nth-child(5) {
+  animation-delay: 200ms;
+}
+.criterion-findings li:nth-child(n + 6) {
+  animation-delay: 250ms;
 }
 
 .finding-index {
@@ -1138,6 +1339,7 @@
   height: 6px;
   border-radius: var(--radius-full);
   background: var(--border-strong);
+  transition: background-color 200ms var(--ease-out-expo);
 }
 
 .rating-pip--filled {
