@@ -106,25 +106,25 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-size: 18px 18px;
+  background-size: 9px 9px;
 }
 
 .bg-dots--lg {
-  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.18) 2.6px, transparent 2.6px);
-  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 30%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 30%);
+  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.1) 1.4px, transparent 1.4px);
+  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 45%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 45%);
 }
 
 .bg-dots--md {
-  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.12) 1.7px, transparent 1.7px);
-  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 55%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 55%);
+  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.065) 0.9px, transparent 0.9px);
+  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 75%);
 }
 
 .bg-dots--sm {
-  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.08) 1px, transparent 1px);
-  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 80%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 80%);
+  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.04) 0.5px, transparent 0.5px);
+  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 100%);
 }
 
 .masthead-eyebrow {
