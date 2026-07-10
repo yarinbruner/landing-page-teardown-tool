@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { CRITERIA_COLORS, CRITERIA_LABELS } from "../criteriaMeta.js";
 import CriteriaTabs from "./CriteriaTabs.jsx";
 
+const EXPANDED_CAP_PX = 220;
+
 function ScoreBar({ percent }) {
   // Uses the criterion's own color (inherited via --criterion-color from
   // the parent .criterion-card) rather than a separate success/warning/
@@ -24,15 +26,27 @@ function RatingPips({ value }) {
   );
 }
 
+function ChevronIcon({ up }) {
+  return (
+    <svg
+      className={`chevron ${up ? "chevron--up" : ""}`}
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      aria-hidden="true"
+    >
+      <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
 // The findings list is the one region allowed to run out of room (LLM
 // finding count/length is unbounded). Instead of always silently clipping,
 // detect the clip and offer an explicit expand toggle. Clicking it
-// animates the list's own height from its collapsed size up to its full
-// content height (measured via scrollHeight, not guessed), so it visibly
-// grows/"slides down" instead of an easy-to-miss internal scrollbar
-// appearing inside an unchanged-size box. If the grown list still doesn't
-// fit the card, .criterion-card--scrollable hands the whole card its own
-// scroll — the same exception already granted to the screenshot pane.
+// animates the list's own height open (measured via scrollHeight, capped
+// at EXPANDED_CAP_PX) and, only past that cap, the list itself scrolls
+// internally — the toggle button lives outside the scrolling <ul>, and
+// everything else in the card (head, tabs, the fix box) never moves.
 function Findings({ findings, expanded, onToggleExpanded }) {
   const [overflowing, setOverflowing] = useState(false);
   const listRef = useRef(null);
@@ -55,8 +69,9 @@ function Findings({ findings, expanded, onToggleExpanded }) {
       return;
     }
     if (!expanded) {
+      const target = Math.min(el.scrollHeight, EXPANDED_CAP_PX);
       setAnimHeight(el.clientHeight);
-      requestAnimationFrame(() => setAnimHeight(el.scrollHeight));
+      requestAnimationFrame(() => setAnimHeight(target));
     } else {
       setAnimHeight(el.clientHeight);
       requestAnimationFrame(() => setAnimHeight(collapsedHeightRef.current));
@@ -76,6 +91,7 @@ function Findings({ findings, expanded, onToggleExpanded }) {
       >
         {findings.map((f, i) => (
           <li key={i}>
+            <span className="finding-index">{i + 1}</span>
             <p>{f.text}</p>
             <RatingPips value={f.rating} />
           </li>
@@ -89,9 +105,7 @@ function Findings({ findings, expanded, onToggleExpanded }) {
           aria-expanded={expanded}
           aria-label={expanded ? "Show fewer findings" : "Show more findings"}
         >
-          <span className={`chevron ${expanded ? "chevron--up" : ""}`} aria-hidden="true">
-            ⌄
-          </span>
+          <ChevronIcon up={expanded} />
         </button>
       )}
     </div>
@@ -116,11 +130,7 @@ export default function CriteriaReport({ teardown, activeKey, onSelectCriterion 
       </div>
 
       {active && (
-        <div
-          key={activeKey}
-          className={`criterion-card panel ${findingsExpanded ? "criterion-card--scrollable" : ""}`}
-          style={{ "--criterion-color": CRITERIA_COLORS[activeKey] }}
-        >
+        <div key={activeKey} className="criterion-card panel" style={{ "--criterion-color": CRITERIA_COLORS[activeKey] }}>
           <header className="criterion-card-head">
             <span className="criterion-card-dot" />
             <span className="criterion-card-title">{CRITERIA_LABELS[activeKey]}</span>
@@ -137,10 +147,10 @@ export default function CriteriaReport({ teardown, activeKey, onSelectCriterion 
             <span className="criterion-fix-label">Change this</span>
             <p>{active.whatToChange}</p>
           </div>
+
+          <CriteriaTabs activeKey={activeKey} onChange={selectCriterion} />
         </div>
       )}
-
-      <CriteriaTabs activeKey={activeKey} onChange={selectCriterion} />
     </div>
   );
 }

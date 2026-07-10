@@ -797,23 +797,24 @@
   min-height: 0;
   overflow: hidden;
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
+  flex-direction: column;
+  gap: var(--space-2);
   padding: var(--space-3);
 }
 
-.score-head-meta {
-  min-width: 0;
-  flex: 1;
+/* Ring and eyebrow sit on one row, vertically centered against each
+   other — not the ring top-aligned against a taller multi-line text
+   block. The verdict paragraph goes full-width below, starting at the
+   same left edge as the ring rather than indented under the eyebrow. */
+.score-head-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
 }
 
-.score-head-meta .criteria-eyebrow {
-  margin-bottom: var(--space-2);
-}
-
-.score-head-meta .criteria-overall-verdict {
-  font-size: 16px;
-  line-height: 1.5;
+.score-head-top .criteria-eyebrow {
+  margin-bottom: 0;
 }
 
 /* The one deliberate exception to the rest of the app's zero-scroll rule:
@@ -991,13 +992,16 @@
   color: var(--ink);
 }
 
-/* One segmented toggle track, outside the card and below it, at the
-   bottom of the right column — centered, its own fixed-height row. The
-   name is available as a tooltip/aria-label plus, for whichever tab is
-   active, spelled out in the card's own title above. */
+/* One segmented toggle track, living inside the card, centered and
+   pinned to the bottom via margin-top:auto — it never moves, even when
+   the findings list above it is expanded/scrolled (see
+   .criterion-findings--expanded). The name is available as a
+   tooltip/aria-label plus, for whichever tab is active, spelled out in
+   the card's own title above. */
 .criteria-tabs {
   display: flex;
   align-self: center;
+  margin-top: auto;
   gap: 2px;
   padding: 3px;
   background: var(--surface-2);
@@ -1053,14 +1057,6 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
-}
-
-/* Set once "Show more" is clicked (see CriteriaReport) — the findings
-   list drops its own internal clip/scroll and grows to its full natural
-   height, so the whole card scrolls together instead of a tiny,
-   easy-to-miss scrollbar appearing inside an unchanged-looking box. */
-.criterion-card--scrollable {
-  overflow-y: auto;
 }
 
 @keyframes card-in {
@@ -1146,12 +1142,13 @@
   transition: max-height 0.35s var(--ease-spring);
 }
 
-/* Expanded: hug the list's own (now animated-to-full) height instead of
-   stretching to fill the card — .criterion-card--scrollable (set
-   alongside this) is what makes any still-unfit content reachable, by
-   letting the whole card scroll. */
+/* Expanded: hug its own (now animated-open, capped) height instead of
+   stretching to fill the card, and scroll internally past the cap — this
+   is the ONLY region in the card allowed to scroll. The card itself, its
+   head, the fix box, and the tabs below never move. */
 .criterion-findings--expanded {
   flex: none;
+  overflow-y: auto;
 }
 
 .criterion-findings-wrap:has(.criterion-findings--expanded) {
@@ -1159,7 +1156,8 @@
 }
 
 /* A long, light-outline pill holding just a chevron — centered under the
-   findings box rather than a left-aligned text link. */
+   findings box, neutral grey rather than tinted per-criterion (it's chrome,
+   not content). Lives outside the scrolling <ul> so it never moves. */
 .criterion-findings-toggle {
   flex-shrink: 0;
   align-self: center;
@@ -1171,20 +1169,19 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   background: var(--surface);
-  color: var(--criterion-color, var(--accent-strong));
+  color: var(--ink-faint);
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .criterion-findings-toggle:hover {
-  border-color: var(--criterion-color, var(--border-strong));
-  background: color-mix(in srgb, var(--criterion-color, var(--accent-strong)) 8%, var(--surface));
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--ink-soft);
 }
 
 .criterion-findings-toggle .chevron {
-  display: inline-block;
-  font-size: 14px;
-  line-height: 1;
+  display: block;
   transition: transform 0.3s var(--ease-spring);
 }
 
@@ -1195,8 +1192,21 @@
 .criterion-findings li {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2);
+}
+
+.finding-index {
+  flex-shrink: 0;
+  width: 1.4em;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--criterion-color, var(--ink-faint));
+}
+
+.criterion-findings li p {
+  flex: 1;
+  min-width: 0;
 }
 
 .criterion-findings p {
