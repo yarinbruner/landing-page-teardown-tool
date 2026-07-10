@@ -106,7 +106,63 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Halftone dot-grid background — sits behind every screen. True halftone
+   (dots that shrink from center to edge, not just fade in opacity) needs
+   each dot SIZE masked independently, and CSS's mask-image can't scope
+   one mask per background-image layer on a single element — so this is
+   three real sibling <div>s in index.html (.bg-dots--lg/md/sm), placed
+   immediately before #root in the DOM and left at the default z-index
+   (auto) and default document flow position. That's deliberate: with no
+   z-index anywhere in this stack, paint order simply follows DOM order,
+   so #root (later in the tree) reliably paints over all three regardless
+   of any stacking-context edge case — no z-index tug-of-war to get
+   wrong. (An earlier version used html::before/body::before/body::after
+   pseudo-elements across two different ancestors, which put them in a
+   different stacking-context comparison than expected and rendered the
+   dots ON TOP of real content — this sibling-div approach is the fix.)
+
+   Same dot-grid position on all three divs, each a different fixed dot
+   size with its own radial mask cutting off at a different radius.
+   Where they overlap in the center, the largest-dot layer (still inside
+   its own mask radius) simply covers the smaller ones at the same grid
+   point; past that radius only the next-smaller layer remains visible,
+   and so on outward — the layering itself creates the shrinking-dot
+   illusion, all pure CSS, no external image. pointer-events:none so
+   they never intercept clicks. */
+.bg-dots {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-size: 22px 22px;
+}
+
+.bg-dots--lg {
+  background-image: radial-gradient(circle, var(--ink-faint) 4px, transparent 4px);
+  mask-image: radial-gradient(circle at 50% 42%, black 0%, transparent 22%);
+  -webkit-mask-image: radial-gradient(circle at 50% 42%, black 0%, transparent 22%);
+}
+
+.bg-dots--md {
+  background-image: radial-gradient(circle, var(--ink-faint) 2.5px, transparent 2.5px);
+  mask-image: radial-gradient(circle at 50% 42%, black 0%, transparent 42%);
+  -webkit-mask-image: radial-gradient(circle at 50% 42%, black 0%, transparent 42%);
+}
+
+.bg-dots--sm {
+  background-image: radial-gradient(circle, var(--ink-faint) 1.2px, transparent 1.2px);
+  mask-image: radial-gradient(circle at 50% 42%, black 0%, transparent 68%);
+  -webkit-mask-image: radial-gradient(circle at 50% 42%, black 0%, transparent 68%);
+}
+
 #root {
+  /* position:relative (no z-index — leave it auto) is required here, not
+     cosmetic: .bg-dots above are position:fixed, which always paints
+     above plain static in-flow content in CSS's stacking order no
+     matter what the DOM order is. Making #root positioned too (with the
+     same auto z-index) puts it in the same paint bucket as .bg-dots, so
+     tree order decides instead — and #root comes after them in the DOM,
+     so it wins. Drop this and the dots render back on top of the app. */
+  position: relative;
   height: 100vh;
   height: 100dvh;
   display: flex;
