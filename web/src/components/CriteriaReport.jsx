@@ -24,9 +24,9 @@ function RatingPips({ value }) {
   );
 }
 
-function ChevronIcon() {
+function ChevronIcon({ up }) {
   return (
-    <svg className="chevron" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+    <svg className={`chevron ${up ? "chevron--up" : ""}`} width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
       <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   );
@@ -39,15 +39,18 @@ function ChevronIcon() {
 // the next finding — a native scrollTo with behavior:"smooth" gives the
 // slide-down animation; overflow:hidden still allows this programmatic
 // scroll while hiding the scrollbar, so nothing but the finding lines
-// themselves ever moves. Reaching the end loops back to the top.
+// themselves ever moves. Reaching the end flips the arrow to point up
+// (a click from there loops back to the top).
 function Findings({ findings }) {
   const [overflowing, setOverflowing] = useState(false);
+  const [atEnd, setAtEnd] = useState(false);
   const listRef = useRef(null);
 
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
     setOverflowing(el.scrollHeight > el.clientHeight + 1);
+    setAtEnd(false);
   }, [findings]);
 
   function handleAdvance() {
@@ -57,6 +60,7 @@ function Findings({ findings }) {
     if (maxScroll <= 1) return;
     if (el.scrollTop >= maxScroll - 1) {
       el.scrollTo({ top: 0, behavior: "smooth" });
+      setAtEnd(false);
       return;
     }
     const items = el.querySelectorAll("li");
@@ -67,7 +71,9 @@ function Findings({ findings }) {
         break;
       }
     }
-    el.scrollTo({ top: Math.min(nextTop, maxScroll), behavior: "smooth" });
+    const target = Math.min(nextTop, maxScroll);
+    el.scrollTo({ top: target, behavior: "smooth" });
+    setAtEnd(target >= maxScroll - 1);
   }
 
   return (
@@ -82,8 +88,13 @@ function Findings({ findings }) {
         ))}
       </ul>
       {overflowing && (
-        <button type="button" className="criterion-findings-toggle" onClick={handleAdvance} aria-label="Show next finding">
-          <ChevronIcon />
+        <button
+          type="button"
+          className="criterion-findings-toggle"
+          onClick={handleAdvance}
+          aria-label={atEnd ? "Back to first finding" : "Show next finding"}
+        >
+          <ChevronIcon up={atEnd} />
         </button>
       )}
     </div>

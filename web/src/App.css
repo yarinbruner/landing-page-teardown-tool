@@ -1172,6 +1172,11 @@
 
 .criterion-findings-toggle .chevron {
   display: block;
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.criterion-findings-toggle .chevron--up {
+  transform: rotate(180deg);
 }
 
 .criterion-findings li {
