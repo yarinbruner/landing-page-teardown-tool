@@ -1671,18 +1671,22 @@
 /* ---------------------------------------------------------------------- */
 
 @media (max-width: 768px) {
-  /* Unlock scroll for the whole document on mobile — the desktop layout
+  /* Unlock vertical scroll, lock horizontal overflow — the desktop layout
      uses overflow:hidden on html/body/#root to prevent any page scroll, but
-     on mobile the content is taller than one viewport and must scroll. */
+     on mobile the content is taller than one viewport and must scroll.
+     overflow-x:clip (not hidden) prevents a scroll container from forming,
+     which avoids the iOS body-scroll escape hatch. */
   html,
   body {
-    overflow: auto;
+    overflow-x: clip;
+    overflow-y: auto;
     height: auto;
   }
 
   #root {
     height: auto;
     min-height: 100dvh;
+    overflow-x: clip;
   }
 
   /* Page shell: natural height + scrollable */
