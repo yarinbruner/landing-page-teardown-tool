@@ -5,8 +5,7 @@
   "functions": {
     "api/expert-teardown.js": {
       "includeFiles": "TEARDOWN_EXPERT.md"
-    },
-    "api/capture-lead.js": {}
+    }
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
