@@ -48,24 +48,19 @@ export default async function handler(req, res) {
   }
 
   if (mock === true) {
-    try {
-      const pageData = await analyzeUrl(url.trim());
-      res.statusCode = 200;
-      res.end(
-        JSON.stringify({
-          url: pageData.url,
-          analyzedAt: new Date().toISOString(),
-          title: pageData.title,
-          screenshotUrl: pageData.screenshotUrl,
-          teardown: applyScoring(buildMockTeardown(pageData)),
-          mock: true,
-        })
-      );
-    } catch (err) {
-      console.error("Mock teardown failed:", err.message);
-      res.statusCode = 502;
-      res.end(JSON.stringify({ error: "Could not load or analyze that URL. Check it and try again." }));
-    }
+    const normalized = url.trim().startsWith("http") ? url.trim() : `https://${url.trim()}`;
+    const pageData = { url: normalized, title: url.trim().replace(/^https?:\/\//, ""), screenshotUrl: null };
+    res.statusCode = 200;
+    res.end(
+      JSON.stringify({
+        url: pageData.url,
+        analyzedAt: new Date().toISOString(),
+        title: pageData.title,
+        screenshotUrl: pageData.screenshotUrl,
+        teardown: applyScoring(buildMockTeardown(pageData)),
+        mock: true,
+      })
+    );
     return;
   }
 
