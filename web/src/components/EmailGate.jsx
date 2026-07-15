@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function EmailGate({ url, title, teardown, onUnlocked }) {
+export default function EmailGate({ url, title, teardown, onConfirmed }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -22,7 +22,7 @@ export default function EmailGate({ url, title, teardown, onUnlocked }) {
       body: JSON.stringify({ email: trimmed, url, title, teardown }),
     }).catch((err) => console.warn("Lead capture failed:", err.message));
 
-    onUnlocked();
+    onConfirmed(trimmed);
   }
 
   return (

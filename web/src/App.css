@@ -1567,6 +1567,49 @@
 }
 
 /* ---------------------------------------------------------------------- */
+/* Confirmation screen                                                     */
+/* ---------------------------------------------------------------------- */
+
+.screen--confirmed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirmed-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  max-width: 420px;
+  width: 100%;
+  padding: var(--space-8);
+  animation: screen-in 300ms var(--ease-out-expo) both;
+}
+
+.confirmed-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.confirmed-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 38px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.confirmed-sub {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* ---------------------------------------------------------------------- */
 /* Campaign ended banner                                                    */
 /* ---------------------------------------------------------------------- */
 

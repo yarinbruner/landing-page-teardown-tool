@@ -1,7 +1,5 @@
 import { useState } from "react";
-import ScreenshotPane from "./components/ScreenshotPane.jsx";
 import ScoreHead from "./components/ScoreHead.jsx";
-import CriteriaReport from "./components/CriteriaReport.jsx";
 import TeaserReport from "./components/TeaserReport.jsx";
 import EmailGate from "./components/EmailGate.jsx";
 import LoadingTips from "./components/LoadingTips.jsx";
@@ -21,7 +19,7 @@ export default function App() {
   const [teardownPhase, setTeardownPhase] = useState("idle");
   const [teardownError, setTeardownError] = useState(null);
   const [teardownResult, setTeardownResult] = useState(null);
-  const [activeCriterion, setActiveCriterion] = useState(CRITERIA_ORDER[0]);
+  const [confirmedEmail, setConfirmedEmail] = useState("");
   const [testMode, setTestMode] = useState(() => localStorage.getItem(TEST_MODE_STORAGE_KEY) === "1");
 
   function toggleTestMode() {
@@ -50,7 +48,6 @@ export default function App() {
         return;
       }
       setTeardownResult(body);
-      setActiveCriterion(CRITERIA_ORDER[0]);
       setTeardownPhase("gated");
     } catch (e) {
       setTeardownError(e.message || "Could not reach the analysis server.");
@@ -105,7 +102,10 @@ export default function App() {
                 url={teardownResult.url}
                 title={teardownResult.title}
                 teardown={teardownResult.teardown}
-                onUnlocked={() => setTeardownPhase("unlocked")}
+                onConfirmed={(email) => {
+                  setConfirmedEmail(email);
+                  setTeardownPhase("confirmed");
+                }}
               />
             </div>
           </div>
@@ -114,37 +114,19 @@ export default function App() {
     );
   }
 
-  if (teardownPhase === "unlocked" && teardownResult) {
+  if (teardownPhase === "confirmed") {
     return (
       <div className="page">
-        <div className="screen screen--report" key="report">
-          <button type="button" className="back-button" onClick={backToInput}>
-            ← New teardown
-          </button>
-
-          <div className="report-head">
-            <div className="report-head-title">
-              {teardownResult.title}
-              {teardownResult.mock && <span className="mock-badge">Mock data</span>}
-            </div>
-            <div className="report-head-meta">
-              {teardownResult.url} · Analyzed {new Date(teardownResult.analyzedAt).toLocaleString()}
-            </div>
-          </div>
-
-          <div className="report-grid">
-            <CriteriaReport
-              teardown={teardownResult.teardown}
-              activeKey={activeCriterion}
-              onSelectCriterion={setActiveCriterion}
-            />
-            <div className="shot-wrap">
-              <ScoreHead
-                overall={teardownResult.teardown.overall}
-                overallVerdict={teardownResult.teardown.overallVerdict}
-              />
-              <ScreenshotPane screenshotUrl={teardownResult.screenshotUrl} />
-            </div>
+        <div className="screen screen--confirmed" key="confirmed">
+          <div className="confirmed-panel panel">
+            <div className="confirmed-icon">✉️</div>
+            <h2 className="confirmed-title">Check your inbox</h2>
+            <p className="confirmed-sub">
+              Your full teardown is on its way to <strong>{confirmedEmail}</strong>. Should arrive in seconds.
+            </p>
+            <button className="url-bar-submit" onClick={backToInput}>
+              Analyze another URL →
+            </button>
           </div>
         </div>
       </div>
