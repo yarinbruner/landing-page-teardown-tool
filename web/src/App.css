@@ -1663,3 +1663,141 @@
   color: var(--ink-soft);
   border-color: var(--border);
 }
+
+/* ---------------------------------------------------------------------- */
+/* Responsive — tablet & mobile (≤ 768px)                                 */
+/* Below this width the two-column report grid collapses to one column    */
+/* and the page switches from viewport-filling to natural page scroll.    */
+/* ---------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  /* Unlock scroll for the whole document on mobile — the desktop layout
+     uses overflow:hidden on html/body/#root to prevent any page scroll, but
+     on mobile the content is taller than one viewport and must scroll. */
+  html,
+  body {
+    overflow: auto;
+    height: auto;
+  }
+
+  #root {
+    height: auto;
+    min-height: 100dvh;
+  }
+
+  /* Page shell: natural height + scrollable */
+  .page {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+    justify-content: flex-start;
+    padding: var(--space-4);
+  }
+
+  .screen--report {
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Single-column stacked grid */
+  .report-grid {
+    grid-template-columns: 1fr;
+    flex: 0 0 auto;
+  }
+
+  /* Shot-wrap (score + email gate) stacks below the criteria column */
+  .shot-wrap {
+    height: auto;
+    flex-direction: column;
+  }
+
+  .score-head {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  /* Score verdict: no longer needs a scroll/toggle affordance */
+  .score-head-verdict-wrap {
+    flex: 0 0 auto;
+  }
+
+  .score-head-verdict-wrap .criteria-overall-verdict {
+    height: auto;
+    overflow: visible;
+  }
+
+  .score-head-verdict-toggle {
+    display: none;
+  }
+
+  /* Screenshot pane: fixed height cap so it doesn't eat the screen */
+  .shot-frame {
+    flex: 0 0 auto;
+    max-height: 260px;
+  }
+
+  /* Email gate panel: natural height */
+  .email-gate {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+  }
+
+  /* Teaser column: natural height, page scrolls */
+  .teaser-report-wrap {
+    height: auto;
+    overflow: visible;
+  }
+
+  .teaser-report {
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Arrow is only useful when the column itself scrolls */
+  .teaser-scroll-arrow {
+    display: none;
+  }
+
+  /* Criteria report (full unlocked view) */
+  .criteria-report {
+    height: auto;
+    overflow: visible;
+  }
+
+  .criterion-card {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .criterion-findings-wrap {
+    flex: 0 0 auto;
+  }
+
+  .criterion-findings {
+    overflow: visible;
+    flex: 0 0 auto;
+  }
+
+  .criterion-fix {
+    max-height: none;
+  }
+
+  .criteria-tabs {
+    margin-top: var(--space-4);
+  }
+
+  /* Confirmed screen */
+  .confirmed-panel {
+    padding: var(--space-5);
+  }
+
+  /* URL bar: tighter on mobile */
+  .url-bar {
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  }
+
+  /* Masthead: tighter vertical spacing */
+  .masthead {
+    margin-bottom: clamp(12px, 4vh, 32px);
+  }
+}

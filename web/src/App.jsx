@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ScoreHead from "./components/ScoreHead.jsx";
 import TeaserReport from "./components/TeaserReport.jsx";
 import EmailGate from "./components/EmailGate.jsx";
@@ -21,6 +21,10 @@ export default function App() {
   const [teardownResult, setTeardownResult] = useState(null);
   const [confirmedEmail, setConfirmedEmail] = useState("");
   const [testMode, setTestMode] = useState(() => localStorage.getItem(TEST_MODE_STORAGE_KEY) === "1");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [teardownPhase]);
 
   function toggleTestMode() {
     setTestMode((prev) => {
