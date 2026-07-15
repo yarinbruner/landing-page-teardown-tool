@@ -505,22 +505,26 @@
 /* ---------------------------------------------------------------------- */
 
 .url-bar {
-  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
   margin: 0 auto clamp(8px, 2vh, 16px);
   max-width: 640px;
-  transition: background-color 150ms var(--ease-out-expo), box-shadow 150ms var(--ease-out-expo);
+  background: var(--surface);
+  /* Use outline so the focus ring lives entirely outside the element and
+     can never conflict with corner-shape rendering inside the border box. */
+  outline: 1.5px solid var(--border-strong);
+  outline-offset: 0;
+  border: none;
+  border-radius: 20px;
+  corner-shape: squircle;
+  transition: background-color 150ms var(--ease-out-expo), outline-color 150ms var(--ease-out-expo);
 }
 
-/* Focus goes on the whole bar, not a hard rectangle around just the text
-   input — a light background/ring wash reads as "this whole control is
-   active" rather than a jarring browser-default box. */
 .url-bar:focus-within {
   background: var(--accent-soft);
-  box-shadow: 0 0 0 1.5px var(--accent-strong);
+  outline-color: var(--accent);
 }
 
 .url-bar-prefix {
@@ -539,6 +543,8 @@
   color: var(--ink);
   outline: none;
   box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .url-bar-input:focus,
@@ -561,7 +567,6 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transform: translateY(0);
   transition: background-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring), box-shadow 150ms var(--ease-out-expo);
 }
 
@@ -1430,4 +1435,144 @@
   font-weight: 500;
   line-height: 1.5;
   color: var(--ink);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Email gate — panel inside the report right column                      */
+/* ---------------------------------------------------------------------- */
+
+.email-gate {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.email-gate-heading-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.email-gate-lock {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.email-gate-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.email-gate-sub {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.email-gate-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.email-gate-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 150ms var(--ease-out-expo), background-color 150ms var(--ease-out-expo);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.email-gate-input:focus {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.email-gate-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.email-gate-error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.email-gate-fine-print {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Teaser report — gated view: first criterion visible, rest blurred      */
+/* ---------------------------------------------------------------------- */
+
+.teaser-report {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Override criterion-card's flex:1 — natural height so .teaser-report
+   can scroll the whole column instead of the card consuming all space. */
+.teaser-report .criterion-card {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.teaser-report .criterion-findings-wrap {
+  flex: 0 0 auto;
+}
+
+.teaser-report .criterion-findings {
+  overflow: visible;
+  flex: 0 0 auto;
+}
+
+.teaser-locked-card {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.teaser-locked-blur {
+  filter: blur(5px);
+  user-select: none;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Campaign ended banner                                                    */
+/* ---------------------------------------------------------------------- */
+
+.banner--ended {
+  max-width: 640px;
+  margin: 0 auto;
+  color: var(--ink-soft);
+  border-color: var(--border);
 }

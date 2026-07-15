@@ -1,10 +1,12 @@
 {
   "name": "landing-page-teardown-tool",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "type": "module",
   "scripts": {
-    "setup": "npm install --prefix server && npm install --prefix web",
-    "dev": "concurrently -n server,web -c blue,green \"npm --prefix server run dev\" \"npm --prefix web run dev\""
+    "setup": "npm install && npm install --prefix web",
+    "dev": "concurrently -n api,web -c blue,green \"node server.js\" \"npm --prefix web run dev\"",
+    "build": "npm --prefix web run build"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

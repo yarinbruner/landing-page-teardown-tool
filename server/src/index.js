@@ -11,7 +11,7 @@ import { applyScoring } from "./scoreAggregation.js";
 dotenv.config({ path: path.resolve(process.cwd(), "..", ".claude", ".env") });
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.SERVER_PORT || 3001;
 const SCREENSHOT_DIR = path.resolve(process.cwd(), "screenshots");
 
 app.use(cors());
