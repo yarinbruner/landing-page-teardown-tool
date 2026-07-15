@@ -1524,6 +1524,13 @@
 /* Teaser report — gated view: first criterion visible, rest blurred      */
 /* ---------------------------------------------------------------------- */
 
+.teaser-report-wrap {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .teaser-report {
   height: 100%;
   min-height: 0;
@@ -1531,6 +1538,43 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.teaser-scroll-arrow {
+  position: absolute;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink-soft);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  opacity: 1;
+  transition: opacity 250ms var(--ease-out-expo), transform 250ms var(--ease-out-expo), background-color 150ms var(--ease-out-expo);
+  animation: arrow-bounce 2s var(--ease-spring) 1s infinite;
+}
+
+.teaser-scroll-arrow:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.teaser-scroll-arrow--hidden {
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+}
+
+@keyframes arrow-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(4px); }
 }
 
 /* Override criterion-card's flex:1 — natural height so .teaser-report
