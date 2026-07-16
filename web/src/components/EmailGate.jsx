@@ -42,7 +42,6 @@ export default function EmailGate({ url, title, teardown, onConfirmed }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          autoFocus
           disabled={submitting}
         />
         <button type="submit" className="url-bar-submit" disabled={submitting}>

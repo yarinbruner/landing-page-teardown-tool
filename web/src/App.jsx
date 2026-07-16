@@ -13,6 +13,22 @@ const EXAMPLES = [
 ];
 
 const TEST_MODE_STORAGE_KEY = "teardown:testMode";
+const CACHE_PREFIX = "teardown:cache:v1:";
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+function getCached(url) {
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + url);
+    if (!raw) return null;
+    const { result, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) { localStorage.removeItem(CACHE_PREFIX + url); return null; }
+    return result;
+  } catch { return null; }
+}
+
+function setCache(url, result) {
+  try { localStorage.setItem(CACHE_PREFIX + url, JSON.stringify({ result, ts: Date.now() })); } catch {}
+}
 
 export default function App() {
   const [input, setInput] = useState("");
@@ -39,6 +55,13 @@ export default function App() {
     setTeardownError(null);
     setTeardownResult(null);
 
+    const cached = !testMode && getCached(url);
+    if (cached) {
+      setTeardownResult(cached);
+      setTeardownPhase("gated");
+      return;
+    }
+
     try {
       const res = await fetch("/api/expert-teardown", {
         method: "POST",
@@ -51,6 +74,7 @@ export default function App() {
         setTeardownPhase("ended");
         return;
       }
+      if (!testMode) setCache(url, body);
       setTeardownResult(body);
       setTeardownPhase("gated");
     } catch (e) {
@@ -96,22 +120,20 @@ export default function App() {
           </div>
 
           <div className="report-grid">
+            <ScoreHead
+              overall={teardownResult.teardown.overall}
+              overallVerdict={teardownResult.teardown.overallVerdict}
+            />
             <TeaserReport teardown={teardownResult.teardown} />
-            <div className="shot-wrap">
-              <ScoreHead
-                overall={teardownResult.teardown.overall}
-                overallVerdict={teardownResult.teardown.overallVerdict}
-              />
-              <EmailGate
-                url={teardownResult.url}
-                title={teardownResult.title}
-                teardown={teardownResult.teardown}
-                onConfirmed={(email) => {
-                  setConfirmedEmail(email);
-                  setTeardownPhase("confirmed");
-                }}
-              />
-            </div>
+            <EmailGate
+              url={teardownResult.url}
+              title={teardownResult.title}
+              teardown={teardownResult.teardown}
+              onConfirmed={(email) => {
+                setConfirmedEmail(email);
+                setTeardownPhase("confirmed");
+              }}
+            />
           </div>
         </div>
       </div>
