@@ -22,6 +22,8 @@ export default function EmailGate({ url, title, teardown, onConfirmed }) {
       body: JSON.stringify({ email: trimmed, url, title, teardown }),
     }).catch((err) => console.warn("Lead capture failed:", err.message));
 
+    if (typeof window.gtag === "function") window.gtag("event", "lead_captured", { url });
+
     onConfirmed(trimmed);
   }
 
