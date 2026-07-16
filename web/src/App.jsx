@@ -30,6 +30,10 @@ function setCache(url, result) {
   try { localStorage.setItem(CACHE_PREFIX + url, JSON.stringify({ result, ts: Date.now() })); } catch {}
 }
 
+function track(event, params = {}) {
+  if (typeof window.gtag === "function") window.gtag("event", event, params);
+}
+
 export default function App() {
   const [input, setInput] = useState("");
   const [teardownPhase, setTeardownPhase] = useState("idle");
@@ -54,6 +58,7 @@ export default function App() {
     setTeardownPhase("loading");
     setTeardownError(null);
     setTeardownResult(null);
+    track("teardown_started", { url });
 
     const cached = !testMode && getCached(url);
     if (cached) {
@@ -77,6 +82,7 @@ export default function App() {
       if (!testMode) setCache(url, body);
       setTeardownResult(body);
       setTeardownPhase("gated");
+      track("teardown_completed", { url });
     } catch (e) {
       setTeardownError(e.message || "Could not reach the analysis server.");
       setTeardownPhase("error");
@@ -204,7 +210,8 @@ export default function App() {
             autoFocus
           />
           <button className="url-bar-submit" type="submit">
-            Teardown →
+            <span className="url-bar-submit-text">Teardown</span>
+            <span className="url-bar-submit-arrow" aria-hidden="true">→</span>
           </button>
         </form>
 

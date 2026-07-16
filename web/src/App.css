@@ -505,6 +505,7 @@
 /* ---------------------------------------------------------------------- */
 
 .url-bar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -537,6 +538,7 @@
 
 .url-bar-input {
   flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
   font-size: 16px;
@@ -545,6 +547,10 @@
   box-shadow: none;
   -webkit-appearance: none;
   appearance: none;
+  /* Reserve room on the right so typed text never runs under the
+     floating submit button (see .url-bar-submit — it's positioned
+     absolutely, inside the pill, so it no longer occupies flex space). */
+  padding-right: 118px;
 }
 
 .url-bar-input:focus,
@@ -558,7 +564,10 @@
 }
 
 .url-bar-submit {
-  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-full);
   border: none;
@@ -568,6 +577,23 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring), box-shadow 150ms var(--ease-out-expo);
+}
+
+/* Floating pill nested inside the search bar itself, rather than a
+   flex sibling that stretches the whole bar's height — this is the one
+   instance of .url-bar-submit that lives inside .url-bar; the button
+   reuses the same class elsewhere (confirmed screen, email gate) as a
+   plain full-width action button, which must keep normal flow. */
+.url-bar .url-bar-submit {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  right: 6px;
+  padding: 0 var(--space-4);
+}
+
+.url-bar-submit-arrow {
+  line-height: 1;
 }
 
 .url-bar-submit:hover:not(:disabled) {
@@ -1784,8 +1810,21 @@
     box-sizing: border-box;
   }
 
-  .url-bar-submit {
-    padding: var(--space-2) var(--space-3);
+  /* Icon-only circular button on mobile — the full "Teardown" label plus
+     arrow doesn't reliably fit inside the floating pill at narrow widths
+     (this is what caused the earlier "Tearc" clipping), so mobile shows
+     just the arrow instead of shrinking the label. */
+  .url-bar .url-bar-submit {
+    width: 40px;
+    padding: 0;
+  }
+
+  .url-bar-submit-text {
+    display: none;
+  }
+
+  .url-bar-input {
+    padding-right: 52px;
   }
 
   /* ── Masthead ────────────────────────────────────────────────────────── */
