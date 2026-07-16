@@ -1792,4 +1792,24 @@
   .masthead {
     margin-bottom: clamp(12px, 4vh, 32px);
   }
+
+  /* ── Idle / loading / error screen: fill page, center content ─────── */
+  /* Without this the content stacks at the top and leaves a huge grey
+     void below it because .page is min-height:100dvh. */
+  .screen:not(.screen--report) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* ── Examples row: center on mobile instead of pinning right ─────── */
+  .below-url-row {
+    justify-content: center;
+  }
+
+  .examples {
+    margin-left: 0;
+    justify-content: center;
+  }
 }
