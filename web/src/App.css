@@ -39,7 +39,7 @@
   align-items: flex-end;
   gap: 18px;
   border-bottom: 2px solid var(--ink);
-  padding: 40px 0 12px;
+  padding: 40px 16px 12px 0;
 }
 
 .lpt-form-label {
