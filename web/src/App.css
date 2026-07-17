@@ -1,682 +1,124 @@
-.page {
-  max-width: 960px;
-  width: 100%;
+/* ---------------------------------------------------------------------- */
+/* Page container                                                          */
+/* ---------------------------------------------------------------------- */
+
+.lpt-container {
+  max-width: 1080px;
   margin: 0 auto;
-  padding: var(--space-5);
-  height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 0 clamp(20px, 5vw, 64px) 100px;
 }
 
 /* ---------------------------------------------------------------------- */
-/* Screens — the input form and the report are two distinct "screens"      */
-/* that swap (not stack/scroll). Input screen sizes to its (deliberately   */
-/* short, vh-clamped) content and sits centered in .page; report screen    */
-/* fills .page exactly and manages its own internal fit — see the         */
-/* report-grid rules below.                                                */
+/* Idle shell — hero headline + URL form                                   */
 /* ---------------------------------------------------------------------- */
 
-.screen {
-  width: 100%;
-  animation: screen-in 300ms var(--ease-out-expo) both;
+.lpt-hero {
+  padding: 56px 0 8px;
 }
 
-@keyframes screen-in {
-  from {
-    opacity: 0;
-    transform: translateX(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.screen--report {
-  height: 100%;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.back-button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  background: none;
-  border: none;
-  padding: var(--space-1) 0;
-  margin-bottom: var(--space-2);
-  color: var(--ink-soft);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  flex-shrink: 0;
-  transform: translateY(0);
-  transition: color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
-}
-
-.back-button:hover {
-  color: var(--ink);
-  transform: translateY(-1px);
-}
-
-.back-button:active {
-  transform: scale(0.97);
-  transition-duration: 100ms;
-  transition-timing-function: var(--ease-out-quick);
-}
-
-/* ---------------------------------------------------------------------- */
-/* Masthead                                                                */
-/* ---------------------------------------------------------------------- */
-
-.masthead {
-  position: relative;
-  text-align: center;
-  /* vh-based, not a fixed token — shrinks smoothly on short viewports
-     instead of relying on a single breakpoint to catch the extreme case. */
-  margin-bottom: clamp(16px, 5vh, 48px);
-}
-
-/* Real text content wrapped in its own positioned box so it reliably
-   paints above .bg-dots below — both land in the same "positioned,
-   auto z-index" stacking bucket this way, so DOM order decides, and
-   this wrapper comes after the dots in the markup. See the .bg-dots
-   comment for why position (not z-index) is what does the work here. */
-.masthead-content {
-  position: relative;
-}
-
-/* Halftone dot-grid texture — confined to the masthead only (it's the
-   header's own texture, not a whole-page background), sized to exactly
-   the masthead's box via inset:0 on a position:relative parent. Small,
-   tight grid and a faint blue tint so it reads as a nuanced surface
-   texture rather than a graphic — three same-position dot grids at
-   different fixed sizes, each masked to a different fade radius, so
-   the layering creates a shrinking-dot illusion (denser at the
-   masthead's center, dissolving toward its edges) with no external
-   image. pointer-events:none so it never intercepts clicks; needs no
-   z-index — see .masthead-content above for how paint order is kept
-   correct without one. */
-.bg-dots {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-size: 9px 9px;
-}
-
-.bg-dots--lg {
-  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.1) 1.4px, transparent 1.4px);
-  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 45%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 45%);
-}
-
-.bg-dots--md {
-  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.065) 0.9px, transparent 0.9px);
-  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 75%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 75%);
-}
-
-.bg-dots--sm {
-  background-image: radial-gradient(circle, rgba(0, 113, 227, 0.04) 0.5px, transparent 0.5px);
-  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 100%);
-}
-
-.masthead-eyebrow {
-  font-size: 14px;
-  letter-spacing: 0.02em;
-  color: var(--ink-soft);
-  font-weight: 500;
-  margin-bottom: clamp(8px, 2vh, 16px);
-}
-
-.masthead-title {
+.lpt-headline {
   font-family: var(--font-display);
-  /* min() of vw and vh so it shrinks on EITHER a short OR a narrow
-     viewport, not just a narrow one. */
-  font-size: clamp(40px, min(9vw, 11vh), 128px);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 1.02;
-  margin: 0 0 clamp(8px, 2vh, 16px);
-  text-wrap: balance;
-  color: var(--ink);
+  font-weight: 700;
+  font-size: clamp(46px, 8vw, 104px);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  margin: 0;
 }
 
-.masthead-sub {
-  font-size: 16px;
+.lpt-sub {
+  font-size: 19px;
   line-height: 1.6;
-  color: var(--ink-soft);
-  max-width: 560px;
-  margin: 0 auto;
-}
-
-/* Short/split-screen windows: fall back to a much more compact rhythm so
-   the input screen still fits without scrolling instead of just clipping
-   the huge headline against the URL bar. */
-/* ---------------------------------------------------------------------- */
-/* Settings row — model picker, API key, and test mode: three compact      */
-/* controls on one quiet line so the URL bar below stays the clear lead.   */
-/* ---------------------------------------------------------------------- */
-
-.settings-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-  max-width: 640px;
-  margin: 0 auto clamp(8px, 2vh, 16px);
-}
-
-/* Model picker — one pill, one popover with provider + model together --- */
-
-.model-picker {
-  position: relative;
-}
-
-.model-picker-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--ink);
-  font-size: 13px;
-  cursor: pointer;
-  transform: translateY(0);
-  transition: border-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
-}
-
-.model-picker-trigger:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-1px);
-}
-
-.model-picker-trigger:active {
-  transform: scale(0.97);
-  transition-duration: 100ms;
-  transition-timing-function: var(--ease-out-quick);
-}
-
-.model-picker-provider {
-  font-weight: 600;
-}
-
-.model-picker-sep,
-.model-picker-model {
+  max-width: 52ch;
+  margin: 32px 0 0;
   color: var(--ink-soft);
 }
 
-.model-picker-chevron {
-  color: var(--ink-faint);
-  margin-left: 2px;
-  display: inline-block;
-  transition: transform 200ms var(--ease-out-expo);
-}
-
-.model-picker-trigger[aria-expanded="true"] .model-picker-chevron {
-  transform: rotate(180deg);
-}
-
-.model-picker-popover {
-  position: absolute;
-  top: calc(100% + var(--space-2));
-  left: 50%;
-  z-index: 20;
-  width: 260px;
-  /* Never extend past the bottom of the viewport (behind the dock, off
-     the visible page, etc.) — scroll internally instead. */
-  max-height: min(360px, calc(100vh - var(--space-8)));
-  overflow-y: auto;
-  padding: var(--space-2);
-  text-align: left;
-  transform-origin: top center;
-  animation: popover-in 200ms var(--ease-spring) both;
-}
-
-@keyframes popover-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-4px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-}
-
-.model-picker-providers {
+/* URL form — underline-only, no pill/card */
+.lpt-form {
   display: flex;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  background: var(--surface-2);
-  border-radius: var(--radius-sm);
-  corner-shape: squircle;
-  margin-bottom: var(--space-2);
+  align-items: flex-end;
+  gap: 18px;
+  border-bottom: 2px solid var(--ink);
+  padding: 40px 0 12px;
 }
 
-.model-picker-provider-tab {
-  flex: 1;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-xs);
-  corner-shape: squircle;
-  border: none;
-  background: transparent;
-  color: var(--ink-soft);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo), box-shadow 150ms var(--ease-out-expo);
-}
-
-.model-picker-provider-tab--active {
-  background: var(--bg);
-  color: var(--ink);
-  box-shadow: var(--shadow-sm);
-}
-
-.model-picker-models {
-  display: flex;
-  flex-direction: column;
-}
-
-.model-picker-option {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
-  border-radius: var(--radius-sm);
-  corner-shape: squircle;
-  border: none;
-  background: transparent;
-  color: var(--ink-soft);
-  font-size: 13px;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo);
-}
-
-.model-picker-option:hover {
-  background: var(--surface-2);
-  color: var(--ink);
-}
-
-.model-picker-option-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: transparent;
-  flex-shrink: 0;
-  transform: scale(1);
-  transition: background-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
-}
-
-.model-picker-option--active .model-picker-option-dot {
-  transform: scale(1.15);
-}
-
-.model-picker-option--active {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.model-picker-option--active .model-picker-option-dot {
-  background: var(--accent);
-}
-
-/* API key — one button, one popover ------------------------------------- */
-
-.api-key-popover-root {
-  position: relative;
-}
-
-.api-key-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--ink-soft);
-  font-size: 13px;
-  cursor: pointer;
-  transform: translateY(0);
-  transition: border-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
-}
-
-.api-key-trigger:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-1px);
-}
-
-.api-key-trigger:active {
-  transform: scale(0.97);
-  transition-duration: 100ms;
-  transition-timing-function: var(--ease-out-quick);
-}
-
-.api-key-trigger--set {
-  color: var(--ink);
-}
-
-.api-key-trigger-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: var(--ink-faint);
-  flex-shrink: 0;
-  transition: background-color 150ms var(--ease-out-expo);
-}
-
-.api-key-trigger-dot--set {
-  background: var(--success);
-}
-
-.api-key-popover {
-  position: absolute;
-  top: calc(100% + var(--space-2));
-  left: 50%;
-  z-index: 20;
-  width: 280px;
-  max-height: min(360px, calc(100vh - var(--space-8)));
-  overflow-y: auto;
-  padding: var(--space-4);
-  text-align: left;
-  transform-origin: top center;
-  animation: popover-in 200ms var(--ease-spring) both;
-}
-
-.api-key-popover-body p {
-  margin: 0 0 var(--space-3);
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
-.api-key-popover-actions {
-  display: flex;
-  gap: var(--space-4);
-}
-
-.api-key-link {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--accent-strong);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 150ms var(--ease-out-expo);
-}
-
-.api-key-link:hover {
-  color: var(--ink);
-}
-
-.api-key-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  width: 100%;
-}
-
-.api-key-input {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  corner-shape: squircle;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--ink);
-  transition: border-color 150ms var(--ease-out-expo);
-}
-
-.api-key-input:focus-visible {
-  border-color: var(--accent-strong);
-}
-
-.api-key-form-actions {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.api-key-save,
-.api-key-cancel {
-  flex: 1;
-  padding: var(--space-2) var(--space-3);
-  /* radius-sm (8px) barely shows the squircle curvature at this button's
-     size — radius-md makes it actually visible instead of reading as a
-     plain rounded rect. */
-  border-radius: var(--radius-md);
-  corner-shape: squircle;
-  border: none;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transform: translateY(0);
-  transition: background-color 150ms var(--ease-out-expo), border-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring);
-}
-
-.api-key-save:hover,
-.api-key-cancel:hover {
-  transform: translateY(-1px);
-}
-
-.api-key-save:active,
-.api-key-cancel:active {
-  transform: scale(0.97);
-  transition-duration: 100ms;
-  transition-timing-function: var(--ease-out-quick);
-}
-
-.api-key-save {
-  background: var(--invert-bg);
-  color: var(--invert-ink);
-}
-
-.api-key-save:hover {
-  background: #4a3826;
-}
-
-.api-key-cancel {
-  background: transparent;
-  color: var(--ink-soft);
-  border: 1px solid var(--border);
-}
-
-.api-key-cancel:hover {
-  border-color: var(--border-strong);
-  color: var(--ink);
-}
-
-/* ---------------------------------------------------------------------- */
-/* URL bar                                                                 */
-/* ---------------------------------------------------------------------- */
-
-.url-bar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
-  margin: 0 auto clamp(8px, 2vh, 16px);
-  max-width: 640px;
-  background: var(--surface);
-  /* Use outline so the focus ring lives entirely outside the element and
-     can never conflict with corner-shape rendering inside the border box. */
-  outline: 1.5px solid var(--border-strong);
-  outline-offset: 0;
-  border: none;
-  border-radius: 20px;
-  corner-shape: squircle;
-  transition: background-color 150ms var(--ease-out-expo), outline-color 150ms var(--ease-out-expo);
-}
-
-.url-bar:focus-within {
-  background: var(--accent-soft);
-  outline-color: var(--accent);
-}
-
-.url-bar-prefix {
-  font-size: 12px;
-  letter-spacing: 0.04em;
+.lpt-form-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  flex-shrink: 0;
+  padding-bottom: 9px;
+  flex: none;
 }
 
-.url-bar-input {
+.lpt-form-input {
   flex: 1;
   min-width: 0;
-  border: none;
+  border: 0;
   background: transparent;
-  font-size: 16px;
+  font: inherit;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(22px, 3.4vw, 32px);
+  padding: 4px 0;
   color: var(--ink);
   outline: none;
-  box-shadow: none;
   -webkit-appearance: none;
   appearance: none;
-  /* Reserve room on the right so typed text never runs under the
-     floating submit button (see .url-bar-submit — it's positioned
-     absolutely, inside the pill, so it no longer occupies flex space). */
-  padding-right: 118px;
 }
 
-.url-bar-input:focus,
-.url-bar-input:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
-
-.url-bar-input::placeholder {
+.lpt-form-input::placeholder {
   color: var(--ink-faint);
 }
 
-.url-bar-submit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: var(--space-2) var(--space-5);
-  border-radius: var(--radius-full);
-  border: none;
-  background: var(--accent);
-  color: var(--invert-ink);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 150ms var(--ease-out-expo), transform 200ms var(--ease-spring), box-shadow 150ms var(--ease-out-expo);
+.lpt-form-btn {
+  border-radius: 50% !important;
+  width: 48px;
+  height: 48px;
+  padding: 0 !important;
+  flex: none;
 }
 
-/* Floating pill nested inside the search bar itself, rather than a
-   flex sibling that stretches the whole bar's height — this is the one
-   instance of .url-bar-submit that lives inside .url-bar; the button
-   reuses the same class elsewhere (confirmed screen, email gate) as a
-   plain full-width action button, which must keep normal flow. */
-.url-bar .url-bar-submit {
-  position: absolute;
-  top: 6px;
-  bottom: 6px;
-  right: 6px;
-  padding: 0 var(--space-4);
-}
-
-.url-bar-submit-arrow {
-  line-height: 1;
-}
-
-.url-bar-submit:hover:not(:disabled) {
-  background: var(--accent-strong);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.url-bar-submit:active:not(:disabled) {
-  transform: scale(0.97);
-  transition-duration: 100ms;
-  transition-timing-function: var(--ease-out-quick);
-}
-
-.url-bar-submit:disabled {
-  background: var(--surface-2);
-  color: var(--ink-faint);
-  cursor: not-allowed;
-}
-
-/* ---------------------------------------------------------------------- */
-/* Examples                                                                */
-/* ---------------------------------------------------------------------- */
-
-/* Below the URL bar: test mode on the left, "Try:" examples on the right —
-   same 640px column as the settings row and URL bar above. */
-.below-url-row {
+/* Below-form row: examples + dev toggle */
+.lpt-below-form {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
   flex-wrap: wrap;
-  max-width: 640px;
-  margin: 0 auto;
+  gap: 16px;
+  margin-top: 20px;
 }
 
-.examples {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-2);
-  font-size: 12px;
+.lpt-examples {
+  margin: 0;
+  font-size: 14.5px;
+  font-style: italic;
   color: var(--ink-faint);
-  flex-wrap: wrap;
 }
 
-/* Deliberately quiet — plain text tinted with each example's color, not a
-   filled pill and not underlined. This is a secondary "if you're not
-   sure" hint, not a set of buttons competing with the URL bar for
-   attention. */
-.example-chip {
-  padding: 0;
-  border: none;
+.lpt-example-btn {
+  border: 0;
   background: none;
-  color: color-mix(in srgb, var(--chip-color, var(--ink-soft)) 75%, var(--ink));
-  font-size: 12px;
-  font-weight: 600;
+  padding: 0;
+  margin: 0 4px;
+  font: inherit;
+  font-style: normal;
+  color: var(--accent-strong);
   cursor: pointer;
   transition: opacity 150ms var(--ease-out-expo);
 }
 
-.example-chip:hover:not(:disabled) {
-  opacity: 0.7;
+.lpt-example-btn:hover {
+  opacity: 0.75;
+  text-decoration: underline;
 }
-
-.example-chip:active:not(:disabled) {
-  opacity: 0.55;
-}
-
-.example-chip:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* ---------------------------------------------------------------------- */
-/* Test mode                                                               */
-/* ---------------------------------------------------------------------- */
 
 .test-mode-row {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
   font-size: 13px;
+  font-style: italic;
   color: var(--ink-faint);
   cursor: pointer;
   transition: color 150ms var(--ease-out-expo);
@@ -686,6 +128,412 @@
   color: var(--ink-soft);
 }
 
+/* ---------------------------------------------------------------------- */
+/* Loading bar                                                             */
+/* ---------------------------------------------------------------------- */
+
+.lpt-loading {
+  padding: 44px 0 8px;
+}
+
+.lpt-loading-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.lpt-loading-status {
+  margin: 0;
+  font-style: italic;
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  animation: fade-in 300ms var(--ease-out-expo);
+}
+
+.lpt-loading-pct {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-strong);
+  flex: none;
+}
+
+.lpt-loading-bar {
+  height: 2px;
+  background: var(--surface-2);
+}
+
+.lpt-loading-bar-fill {
+  height: 100%;
+  background: var(--accent-strong);
+  transition: width 250ms linear;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Error / ended notices                                                   */
+/* ---------------------------------------------------------------------- */
+
+.lpt-notice {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+  margin-top: 16px;
+}
+
+.lpt-notice-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.lpt-notice-label--danger {
+  color: var(--danger);
+}
+
+.lpt-notice-text {
+  margin: 6px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Report — 2-column grid                                                  */
+/* ---------------------------------------------------------------------- */
+
+.lpt-report-grid {
+  display: grid;
+  grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
+  gap: 64px;
+  align-items: start;
+  padding-top: 40px;
+  width: 100%; /* gives fr units a definite container to resolve against */
+}
+
+/* ---------------------------------------------------------------------- */
+/* Sidebar (sticky)                                                        */
+/* ---------------------------------------------------------------------- */
+
+.lpt-sidebar {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0; /* prevent grid blowout when content is wider than track */
+}
+
+.lpt-score-num {
+  font-size: clamp(64px, 9vw, 104px);
+  font-weight: 700;
+  line-height: 0.9;
+}
+
+.lpt-tier-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: -6px;
+}
+
+.lpt-tier-of {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.lpt-verdict {
+  position: relative;
+}
+
+.lpt-verdict-text {
+  margin: 8px 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 16.5px;
+  line-height: 1.55;
+  max-height: 9.3em;
+  /* overflow:hidden both enables the JS scrollTo trick (scrollTop works
+     on hidden-overflow containers) and prevents the hanging-quote indent
+     from creating a horizontal bleed. */
+  overflow: hidden;
+  text-indent: -0.5em;
+  padding-left: 0.5em;
+  scroll-behavior: smooth;
+}
+
+.lpt-verdict-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  margin-top: 4px;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 150ms var(--ease-out-expo);
+}
+
+.lpt-verdict-more:hover {
+  color: var(--ink);
+}
+
+.lpt-result-meta {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  line-height: 1.8;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Report main content                                                     */
+/* ---------------------------------------------------------------------- */
+
+.lpt-criterion-first {
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lpt-criterion-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.lpt-criterion-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--accent-strong);
+}
+
+.lpt-criterion-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+}
+
+.lpt-score-bar {
+  height: 2px;
+  background: var(--surface-2);
+  margin-bottom: 20px;
+}
+
+.lpt-score-bar-fill {
+  height: 100%;
+  background: var(--ink);
+  transition: width 300ms var(--ease-out-expo);
+}
+
+.lpt-findings {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lpt-findings li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.lpt-finding-index {
+  flex: none;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-faint);
+  min-width: 1.4em;
+}
+
+.lpt-finding-text {
+  flex: 1;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.lpt-finding-pips {
+  flex: none;
+  display: flex;
+  gap: 3px;
+  margin-top: 5px;
+}
+
+.lpt-finding-pip {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.lpt-what-to-change {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.lpt-what-arrow {
+  color: var(--accent-strong);
+  font-style: normal;
+  margin-right: 8px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Locked criteria (blurred teaser) + email gate overlay                  */
+/* ---------------------------------------------------------------------- */
+
+.lpt-teaser {
+  position: relative;
+  margin-top: 28px;
+}
+
+.lpt-teaser-scroll {
+  max-height: 460px;
+  overflow-y: auto;
+  mask-image: linear-gradient(to bottom, black calc(100% - 64px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 64px), transparent 100%);
+}
+
+.lpt-locked-criterion {
+  padding: 26px 0;
+  border-bottom: 1px solid var(--border);
+  filter: blur(3px);
+  opacity: 0.6;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Email gate card — floats over the blurred teaser */
+.lpt-gate-card {
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, 92%);
+  z-index: 2;
+}
+
+.lpt-gate-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lpt-gate-lock {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.lpt-gate-sub {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.lpt-gate-form {
+  display: flex;
+  gap: 10px;
+}
+
+.lpt-gate-error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.lpt-gate-fine-print {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Confirmed screen                                                        */
+/* ---------------------------------------------------------------------- */
+
+.lpt-confirmed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 100px 0;
+  gap: 18px;
+  max-width: 52ch;
+}
+
+.lpt-confirmed-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-strong);
+}
+
+.lpt-confirmed-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(30px, 4vw, 44px);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.lpt-confirmed-sub {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Mock badge                                                              */
+/* ---------------------------------------------------------------------- */
+
+.mock-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Toggle switch (dev mode)                                                */
+/* ---------------------------------------------------------------------- */
+
 .toggle-switch {
   position: relative;
   display: inline-flex;
@@ -694,9 +542,6 @@
   flex-shrink: 0;
 }
 
-/* The visible switch stays small and quiet by design — the actual tap
-   target is invisibly extended to ~44px so it still meets the touch
-   target minimum without bulking up the control's appearance. */
 .toggle-switch input {
   position: absolute;
   inset: -12px;
@@ -722,7 +567,7 @@
   height: 16px;
   border-radius: var(--radius-full);
   background: var(--bg);
-  box-shadow: 0 1px 3px rgba(43, 32, 19, 0.35);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   transition: transform 200ms var(--ease-spring);
 }
 
@@ -739,1116 +584,63 @@
   outline-offset: 2px;
 }
 
-.mock-badge {
-  display: inline-block;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-full);
-  background: var(--warning-soft);
-  color: var(--warning);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-/* ---------------------------------------------------------------------- */
-/* Banners                                                                 */
-/* ---------------------------------------------------------------------- */
-
-.banner {
-  padding: var(--space-4);
-  font-size: 14px;
-  line-height: 1.5;
-  margin-top: var(--space-5);
-}
-
-.banner--error {
-  color: var(--danger);
-  border-color: var(--danger-soft);
-}
-
-/* ---------------------------------------------------------------------- */
-/* Loading state                                                          */
-/* ---------------------------------------------------------------------- */
-
-/* Replaces the URL bar + below-url row in place while a teardown runs,
-   instead of appending below them — same slot, same width, so nothing
-   jumps and there's nothing stacked underneath waiting to be revealed. */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
-}
-
-.loading-panel {
-  width: 100%;
-  max-width: 640px;
-  padding: var(--space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  align-items: center;
-}
-
-.loading-bar-row {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.loading-bar {
-  flex: 1;
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: var(--surface-2);
-  overflow: hidden;
-}
-
-.loading-bar-fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  background: var(--accent);
-  transition: width 250ms var(--ease-out-expo);
-}
-
-.loading-percent {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-soft);
-  width: 3ch;
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.loading-status {
-  margin: 0;
-  font-size: 14px;
-  color: var(--ink-soft);
-  text-align: center;
-  animation: fade-in 300ms var(--ease-out-expo);
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* ---------------------------------------------------------------------- */
-/* Report shell                                                            */
-/* ---------------------------------------------------------------------- */
-
-/* Deliberately not a .panel — this is page furniture (source URL, title,
-   timestamp), not a content module, so it shouldn't compete visually with
-   the screenshot/criteria panels below it for a bounded box of its own.
-   A plain inline header keeps it compact. */
-.report-head {
-  padding: 0 var(--space-1);
-  margin-bottom: var(--space-2);
-  flex-shrink: 0;
-}
-
-.report-head-title {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  text-wrap: balance;
-}
-
-.report-head-meta {
-  font-size: 12px;
-  color: var(--ink-faint);
-  margin-top: 2px;
-}
-
-/* Two-column desktop layout: criteria fill the left, score+gate fill the
-   right. grid-template-areas drives the placement so JSX order can be
-   score → criteria → gate (correct mobile stacking order) while desktop
-   puts score+gate in the right column. */
-.report-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  grid-template-rows: 1fr 1fr;
-  grid-template-areas:
-    "teaser score"
-    "teaser gate";
-  gap: var(--space-4);
-  flex: 1;
-  min-height: 0;
-}
-
-.score-head       { grid-area: score; }
-.teaser-report-wrap { grid-area: teaser; }
-.email-gate       { grid-area: gate; }
-
-/* ---------------------------------------------------------------------- */
-/* Screenshot pane                                                         */
-/* ---------------------------------------------------------------------- */
-
-/* Score sits in the top half of the left column, screenshot in the
-   bottom half — an even 50/50 split gives the verdict text enough room
-   to read in full instead of being squeezed and clamped. */
-.shot-wrap {
-  height: 100%;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* Vertical padding (var(--space-3)) matches .shot-frame's exactly — with
-   flex:1 on both and box-sizing:border-box, mismatched top/bottom padding
-   was enough to break the intended 50/50 height split between this and
-   the screenshot below it, so those stay in lockstep on purpose.
-   Horizontal padding is independent of that height math, so it uses
-   var(--space-4) to match every other panel's inset on this screen
-   (.criterion-card, .criteria-callout) instead of the tighter value —
-   was previously space-3 on all sides, which sat 4px closer to the edge
-   than every other panel here. */
-.score-head {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-}
-
-/* Ring and eyebrow sit on one row, vertically centered against each
-   other — not the ring top-aligned against a taller multi-line text
-   block. The verdict paragraph goes full-width below, starting at the
-   same left edge as the ring rather than indented under the eyebrow. */
-.score-head-top {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-shrink: 0;
-}
-
-.score-head-top .criteria-eyebrow {
-  margin-bottom: 0;
-}
-
-/* Fixed-size box — never grows. The arrow (rendered only when the
-   verdict text actually overflows) pages through it via scrollTo, the
-   same pattern as the findings list, instead of shrinking type size to
-   try to fit every possible verdict length. */
-.score-head-verdict-wrap {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-2);
-  flex: 1;
-  min-height: 0;
-}
-
-.score-head-verdict-wrap .criteria-overall-verdict {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  overflow: hidden;
-  scroll-behavior: smooth;
-}
-
-.score-head-verdict-toggle {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: var(--surface);
-  color: var(--ink-faint);
-  cursor: pointer;
-  transition: border-color 150ms var(--ease-out-expo), background-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo);
-}
-
-.score-head-verdict-toggle:hover {
-  border-color: var(--border-strong);
-  background: var(--surface-2);
-  color: var(--ink-soft);
-}
-
-.score-head-verdict-toggle:active {
-  transform: scale(0.9);
-  transition: transform 100ms var(--ease-out-quick);
-}
-
-.score-head-verdict-toggle .chevron {
-  display: block;
-  transition: transform 200ms var(--ease-spring);
-}
-
-.score-head-verdict-toggle .chevron--up {
-  transform: rotate(180deg);
-}
-
-/* The one deliberate exception to the rest of the app's zero-scroll rule:
-   shrinking the full-page screenshot down to fit its column (object-fit:
-   contain) made it too small to actually read. Letting this one pane
-   scroll at near-natural width keeps the screenshot legible while every
-   other region of the report still never scrolls. */
-.shot-frame {
-  flex: 1;
-  min-height: 0;
-  padding: var(--space-3);
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.shot-frame img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius-md);
-  corner-shape: squircle;
-}
-
-.shot-frame::-webkit-scrollbar {
-  width: 8px;
-}
-
-.shot-frame::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.shot-frame::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-full);
-}
-
-/* ---------------------------------------------------------------------- */
-/* Score stamp                                                             */
-/* ---------------------------------------------------------------------- */
-
-/* A circular fill-up ring instead of a bordered badge — the ring itself
-   communicates the score as a proportion (like a battery/progress
-   indicator) so the number in the middle can stay small and whole. */
-.stamp {
-  position: relative;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: stamp-in 300ms var(--ease-spring) both;
-}
-
-@keyframes stamp-in {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.stamp-ring {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.stamp-ring-track {
-  stroke: var(--surface-2);
-}
-
-.stamp-ring-fill {
-  transition: stroke-dashoffset 400ms var(--ease-out-expo);
-}
-
-.stamp-score {
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.stamp--lg .stamp-score {
-  font-size: 18px;
-}
-
-.stamp--sm .stamp-score {
-  font-size: 13px;
-}
-
-.stamp--success .stamp-ring-fill,
-.stamp--success .stamp-score {
-  stroke: var(--success);
-  color: var(--success);
-}
-
-.stamp--warning .stamp-ring-fill,
-.stamp--warning .stamp-score {
-  stroke: var(--warning);
-  color: var(--warning);
-}
-
-.stamp--danger .stamp-ring-fill,
-.stamp--danger .stamp-score {
-  stroke: var(--danger);
-  color: var(--danger);
-}
-
-/* ---------------------------------------------------------------------- */
-/* Criteria report                                                         */
-/* ---------------------------------------------------------------------- */
-
-.criteria-report {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.criteria-eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin-bottom: var(--space-2);
-  text-wrap: pretty;
-}
-
-.criteria-overall-verdict {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--ink);
-  font-weight: 500;
-}
-
-.criteria-callout {
-  padding: var(--space-3) var(--space-4);
-  background: var(--accent-soft);
-  border-color: var(--accent-strong);
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-/* On a genuinely short viewport there isn't room to keep every section at
-   full size without crushing the actual finding detail (the most specific,
-   actionable content) down to nothing. The page-level highest-leverage-fix
-   is the most skippable — each criterion's own "change this" box inside
-   the card below still carries actionable guidance on its own. */
-@media (max-height: 700px) {
-  .criteria-callout {
-    display: none;
-  }
-}
-
-.criteria-callout-label {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--accent-strong);
-  margin-bottom: var(--space-2);
-}
-
-.criteria-callout p {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--ink);
-}
-
-/* One segmented toggle track, living inside the card, centered and
-   pinned to the bottom via margin-top:auto — it never moves, even when
-   the findings list above it is paged (see .criterion-findings). The
-   name is available as a tooltip/aria-label plus, for whichever tab is
-   active, spelled out in the card's own title above. */
-.criteria-tabs {
-  display: flex;
-  align-self: center;
-  margin-top: auto;
-  gap: 2px;
-  padding: 3px;
-  background: var(--surface-2);
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
-}
-
-.criteria-tab {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-full);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: background-color 150ms var(--ease-out-expo), box-shadow 150ms var(--ease-out-expo);
-}
-
-.criteria-tab-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: var(--radius-full);
-  background: var(--tab-color, var(--accent-strong));
-  transform: scale(1);
-  transition: transform 200ms var(--ease-spring);
-}
-
-.criteria-tab:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-.criteria-tab:active {
-  transform: scale(0.9);
-  transition: transform 100ms var(--ease-out-quick);
-}
-
-.criteria-tab--active {
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-}
-
-.criteria-tab--active .criteria-tab-dot {
-  transform: scale(1.15);
-}
-
-.criterion-card {
-  padding: var(--space-3) var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  animation: card-in 250ms var(--ease-out-expo) both;
-}
-
-@keyframes card-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.criterion-card-head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-shrink: 0;
-}
-
-.criterion-card-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-full);
-  background: var(--criterion-color, var(--accent-strong));
-  flex-shrink: 0;
-}
-
-.criterion-card-title {
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-}
-
-.score-bar {
-  width: 100%;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background: var(--surface-2);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.score-bar-fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  background: var(--criterion-color, var(--accent-strong));
-  transition: width 300ms var(--ease-out-expo);
-}
-
-/* The one region allowed to actually run out of room — findings text
-   length is LLM-generated and unbounded, and there is nowhere left to
-   shrink once everything around it is already flex-shrink:0. A light
-   outline makes it read as its own bounded box within the card. This box
-   NEVER resizes — clicking the arrow below (rendered only when content
-   is actually truncated — see the Findings component) scrolls its
-   contents to the next finding instead of growing the box, so nothing
-   around it — the card, its head, the fix box, the tabs — ever moves or
-   gets pushed. */
-.criterion-findings-wrap {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 48px;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  corner-shape: squircle;
-}
-
-.criterion-findings {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  /* Pressing the arrow scrolls this list to the next finding via JS
-     (scrollTo) — scroll-behavior:smooth turns that into a soft glide
-     instead of an instant jump, still with the scrollbar itself hidden
-     by overflow:hidden above. */
-  scroll-behavior: smooth;
-}
-
-/* A long, light-outline pill holding just a chevron — centered under the
-   findings box, neutral grey rather than tinted per-criterion (it's chrome,
-   not content). Lives outside the scrolling <ul> so it never moves. */
-.criterion-findings-toggle {
-  flex-shrink: 0;
-  align-self: center;
-  width: 64px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: var(--surface);
-  color: var(--ink-faint);
-  cursor: pointer;
-  transition: border-color 150ms var(--ease-out-expo), background-color 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo);
-}
-
-.criterion-findings-toggle:hover {
-  border-color: var(--border-strong);
-  background: var(--surface-2);
-  color: var(--ink-soft);
-}
-
-.criterion-findings-toggle:active {
-  transform: scale(0.95);
-  transition: transform 100ms var(--ease-out-quick);
-}
-
-.criterion-findings-toggle .chevron {
-  display: block;
-  transition: transform 200ms var(--ease-spring);
-}
-
-.criterion-findings-toggle .chevron--up {
-  transform: rotate(180deg);
-}
-
-.criterion-findings li {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  animation: finding-in 400ms var(--ease-out-expo) both;
-}
-
-@keyframes finding-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Staggered settle, capped at 6 items / 300ms total so a long findings
-   list doesn't take forever to finish appearing. */
-.criterion-findings li:nth-child(1) {
-  animation-delay: 0ms;
-}
-.criterion-findings li:nth-child(2) {
-  animation-delay: 50ms;
-}
-.criterion-findings li:nth-child(3) {
-  animation-delay: 100ms;
-}
-.criterion-findings li:nth-child(4) {
-  animation-delay: 150ms;
-}
-.criterion-findings li:nth-child(5) {
-  animation-delay: 200ms;
-}
-.criterion-findings li:nth-child(n + 6) {
-  animation-delay: 250ms;
-}
-
-.finding-index {
-  flex-shrink: 0;
-  width: 1.4em;
-  font-size: 12px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--criterion-color, var(--ink-faint));
-}
-
-.criterion-findings li p {
-  flex: 1;
-  min-width: 0;
-}
-
-.criterion-findings p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
-.rating-pips {
-  display: inline-flex;
-  gap: 3px;
-  flex-shrink: 0;
-}
-
-.rating-pip {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: var(--border-strong);
-  transition: background-color 200ms var(--ease-out-expo);
-}
-
-.rating-pip--filled {
-  background: var(--criterion-color, var(--ink));
-}
-
-.criterion-fix {
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  corner-shape: squircle;
-  background: color-mix(in srgb, var(--criterion-color, var(--accent-strong)) 10%, #fff);
-  border: 1px solid var(--criterion-color, var(--accent-strong));
-  flex-shrink: 0;
-  overflow: hidden;
-  max-height: 40%;
-}
-
-.criterion-fix-label {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--criterion-color, var(--accent-strong));
-  margin-bottom: var(--space-1);
-}
-
-.criterion-fix p {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.5;
-  color: var(--ink);
-}
-
-/* ---------------------------------------------------------------------- */
-/* Email gate — panel inside the report right column                      */
-/* ---------------------------------------------------------------------- */
-
-.email-gate {
-  flex: 1;
-  min-height: 0;
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  justify-content: center;
-}
-
-.email-gate-heading-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.email-gate-lock {
-  font-size: 20px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.email-gate-title {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-}
-
-.email-gate-sub {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--ink-soft);
-}
-
-.email-gate-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.email-gate-input {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-full);
-  border: 1.5px solid var(--border-strong);
-  background: var(--surface);
-  font-size: 14px;
-  color: var(--ink);
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color 150ms var(--ease-out-expo), background-color 150ms var(--ease-out-expo);
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.email-gate-input:focus {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.email-gate-input::placeholder {
-  color: var(--ink-faint);
-}
-
-.email-gate-error {
-  margin: 0;
-  font-size: 13px;
-  color: var(--danger);
-}
-
-.email-gate-fine-print {
-  margin: 0;
-  font-size: 12px;
-  color: var(--ink-faint);
-}
-
-/* ---------------------------------------------------------------------- */
-/* Teaser report — gated view: first criterion visible, rest blurred      */
-/* ---------------------------------------------------------------------- */
-
-.teaser-report-wrap {
-  position: relative;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.teaser-report {
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.teaser-scroll-arrow {
-  position: absolute;
-  bottom: var(--space-4);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--ink-soft);
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  opacity: 1;
-  transition: opacity 250ms var(--ease-out-expo), transform 250ms var(--ease-out-expo), background-color 150ms var(--ease-out-expo);
-  animation: arrow-bounce 2s var(--ease-spring) 1s infinite;
-}
-
-.teaser-scroll-arrow:hover {
-  background: var(--surface-2);
-  color: var(--ink);
-}
-
-.teaser-scroll-arrow--hidden {
-  opacity: 0;
-  pointer-events: none;
-  animation: none;
-}
-
-@keyframes arrow-bounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50%       { transform: translateX(-50%) translateY(4px); }
-}
-
-/* Override criterion-card's flex:1 — natural height so .teaser-report
-   can scroll the whole column instead of the card consuming all space. */
-.teaser-report .criterion-card {
-  flex: 0 0 auto;
-  overflow: visible;
-}
-
-.teaser-report .criterion-findings-wrap {
-  flex: 0 0 auto;
-}
-
-.teaser-report .criterion-findings {
-  overflow: visible;
-  flex: 0 0 auto;
-}
-
-.teaser-locked-card {
-  padding: var(--space-3) var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  flex-shrink: 0;
-}
-
-.teaser-locked-blur {
-  filter: blur(5px);
-  user-select: none;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* ---------------------------------------------------------------------- */
-/* Confirmation screen                                                     */
-/* ---------------------------------------------------------------------- */
-
-.screen--confirmed {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.confirmed-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--space-4);
-  max-width: 420px;
-  width: 100%;
-  padding: var(--space-8);
-  animation: screen-in 300ms var(--ease-out-expo) both;
-}
-
-.confirmed-icon {
-  font-size: 40px;
-  line-height: 1;
-}
-
-.confirmed-title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(28px, 5vw, 38px);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-}
-
-.confirmed-sub {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-}
-
-/* ---------------------------------------------------------------------- */
-/* Campaign ended banner                                                    */
-/* ---------------------------------------------------------------------- */
-
-.banner--ended {
-  max-width: 640px;
-  margin: 0 auto;
-  color: var(--ink-soft);
-  border-color: var(--border);
-}
-
 /* ---------------------------------------------------------------------- */
 /* Responsive — tablet & mobile (≤ 768px)                                 */
 /* ---------------------------------------------------------------------- */
 
 @media (max-width: 768px) {
-  /* ── Document shell ─────────────────────────────────────────────────── */
-  /* Unlock vertical scroll; clip horizontal so nothing bleeds past the
-     edge. overflow-x:clip avoids creating a scroll container (unlike
-     overflow-x:hidden). */
-  html,
-  body {
-    overflow-x: clip;
-    overflow-y: auto;
-    height: auto;
+  .lpt-report-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    padding-top: 24px;
   }
 
-  #root {
-    height: auto;
-    min-height: 100dvh;
-    overflow-x: clip;
+  .lpt-sidebar {
+    position: static;
   }
 
-  /* ── Page shell ──────────────────────────────────────────────────────── */
-  .page {
-    height: auto;
-    min-height: 100%;
-    overflow: visible;
-    justify-content: flex-start;
-    padding: var(--space-4);
+  .lpt-teaser-scroll {
+    max-height: none;
+    mask-image: none;
+    -webkit-mask-image: none;
   }
 
-  .screen--report {
-    height: auto;
-    overflow: visible;
-  }
-
-  /* ── Report grid: single column, natural JSX order ─────────────────── */
-  /* JSX order is score → criteria → gate, so mobile reads top-to-bottom:
-     score card, then the blurred criteria, then the email form. */
-  .report-grid {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    flex: 0 0 auto;
-  }
-
-  /* ── Score head ──────────────────────────────────────────────────────── */
-  .score-head {
-    overflow: visible;
-  }
-
-  .score-head-verdict-wrap {
-    flex: 0 0 auto;
-  }
-
-  .score-head-verdict-wrap .criteria-overall-verdict {
-    height: auto;
-    overflow: visible;
-  }
-
-  /* No room/need for the paging toggle on mobile — text is fully visible */
-  .score-head-verdict-toggle {
-    display: none;
-  }
-
-  /* ── Teaser report ───────────────────────────────────────────────────── */
-  .teaser-report-wrap {
-    height: auto;
-    overflow: visible;
-  }
-
-  .teaser-report {
-    height: auto;
-    overflow: visible;
-  }
-
-  /* Arrow only makes sense when the column itself scrolls (desktop) */
-  .teaser-scroll-arrow {
-    display: none;
-  }
-
-  /* Criterion cards: natural height so page scroll handles overflow */
-  .teaser-report .criterion-card {
-    flex: 0 0 auto;
-    overflow: visible;
-  }
-
-  .teaser-report .criterion-findings-wrap {
-    flex: 0 0 auto;
-  }
-
-  .teaser-report .criterion-findings {
-    overflow: visible;
-    flex: 0 0 auto;
-  }
-
-  /* ── Email gate ──────────────────────────────────────────────────────── */
-  .email-gate {
-    justify-content: flex-start;
-  }
-
-  /* ── Confirmed screen ────────────────────────────────────────────────── */
-  .confirmed-panel {
-    padding: var(--space-5);
-  }
-
-  /* ── URL bar ─────────────────────────────────────────────────────────── */
-  .url-bar {
-    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  .lpt-gate-card {
+    position: static;
+    transform: none;
     width: 100%;
-    box-sizing: border-box;
+    margin-top: 24px;
   }
 
-  /* Icon-only circular button on mobile — the full "Teardown" label plus
-     arrow doesn't reliably fit inside the floating pill at narrow widths
-     (this is what caused the earlier "Tearc" clipping), so mobile shows
-     just the arrow instead of shrinking the label. */
-  .url-bar .url-bar-submit {
+  .lpt-confirmed {
+    padding: 48px 0;
+  }
+
+  .lpt-form {
+    padding: 24px 0 12px;
+    gap: 12px;
+  }
+
+  .lpt-form-btn {
     width: 40px;
-    padding: 0;
+    height: 40px;
   }
 
-  .url-bar-submit-text {
+  .lpt-score-num {
+    font-size: clamp(56px, 18vw, 80px);
+  }
+
+  .lpt-verdict-text {
+    max-height: none;
+  }
+
+  .lpt-verdict-more {
     display: none;
   }
 
-  .url-bar-input {
-    padding-right: 52px;
-  }
-
-  /* ── Masthead ────────────────────────────────────────────────────────── */
-  .masthead {
-    margin-bottom: clamp(12px, 4vh, 32px);
-  }
-
-  /* ── Idle / loading / error screen: fill page, center content ─────── */
-  /* Without this the content stacks at the top and leaves a huge grey
-     void below it because .page is min-height:100dvh. */
-  .screen:not(.screen--report) {
-    flex: 1;
-    display: flex;
+  .lpt-below-form {
     flex-direction: column;
-    justify-content: center;
-  }
-
-  /* ── Examples row: center on mobile instead of pinning right ─────── */
-  .below-url-row {
-    justify-content: center;
-  }
-
-  .examples {
-    margin-left: 0;
-    justify-content: center;
+    align-items: flex-start;
+    gap: 12px;
   }
 }

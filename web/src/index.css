@@ -1,74 +1,78 @@
-/* Design system: clean, light, Apple-like — a white/light-gray surface
-   system, near-black ink, and Apple's own production blue as the one
-   accent, instead of a themed paper/highlighter concept. A five-color
-   "Boggle" palette (see App.jsx's CRITERION_COLORS) still gives each of
-   the five teardown criteria its own identity within that otherwise
-   restrained base. Every color re-verified against WCAG AA on the actual
-   backgrounds below. San Francisco where available (-apple-system), Inter
-   as the web fallback — no serif anywhere. */
+/* Design system: Broadsheet — newsprint set for the web. Near-black ink
+   (--ink) on paper white (--bg), with cyan and magenta as the process
+   accents (magenta reserved for the rare second spot, never paired with
+   cyan in the same small component). Source Serif 4 throughout — no
+   sans-serif chrome. Crisp, minimal radii (1–4px) rather than Apple-style
+   pill/squircle shapes; a five-color "Boggle" palette (see App.jsx's
+   CRITERION_COLORS) still gives each of the five teardown criteria its
+   own identity within that otherwise restrained base. See Broadsheet's
+   own readme.md/theme.json (claude.ai/design project "Broadsheet") for
+   the source tokens this file was re-derived from. */
 :root {
-  /* Surfaces — white cards on Apple's signature light-gray page background */
-  --bg: #f5f5f7;
-  --surface: #ffffff;
-  --surface-2: #e8e8ed;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.14);
+  /* Surfaces — paper-white ground, a slightly deeper paper for cards */
+  --bg: #f3f2f2;
+  --surface: #eae9e9;
+  --surface-2: #d7d3d3;
+  --border: rgba(32, 30, 29, 0.16);
+  --border-strong: rgba(32, 30, 29, 0.28);
 
-  /* Ink / text — Apple's actual near-black, not pure #000 */
-  --ink: #1d1d1f;
-  --ink-soft: rgba(29, 29, 31, 0.68);
-  --ink-faint: rgba(29, 29, 31, 0.45);
+  /* Ink / text — Broadsheet's near-black newsprint ink */
+  --ink: #201e1d;
+  --ink-soft: rgba(32, 30, 29, 0.7);
+  --ink-faint: rgba(32, 30, 29, 0.45);
 
   /* Inverted controls (dark-on-light, used for low-emphasis toggles) */
-  --invert-bg: #1d1d1f;
-  --invert-ink: #ffffff;
+  --invert-bg: #201e1d;
+  --invert-ink: #f3f2f2;
 
-  /* Primary accent — Apple's own production blue. One color, one job
-     everywhere it appears (buttons, links, focus rings, active states) —
-     no two-step fill/text split needed here since white text on it and
-     the blue as text-on-white both clear 4.5:1 on their own. */
-  --accent: #0071e3; /* 4.7:1 on white, symmetric with white text on it */
-  --accent-strong: #0058b0; /* hover/press — 6.95:1 */
-  --accent-soft: rgba(0, 113, 227, 0.1);
+  /* Primary accent — the process cyan. Base for large fills/rings, the
+     700 ramp step (--accent-strong) for hover/press AND for paragraph-size
+     text in the accent, since the base cyan only clears 3:1 (large text/
+     icons), not the 4.5:1 body-copy bar. */
+  --accent: #0088b0;
+  --accent-strong: #006786; /* accent-700 — 5.7:1 on paper */
+  --accent-soft: rgba(0, 136, 176, 0.1);
 
-  /* Semantic — status only, never reused decoratively. */
-  --success: #15803d;
-  --success-soft: rgba(21, 128, 61, 0.1);
-  --warning: #b45309;
-  --warning-soft: rgba(180, 83, 9, 0.1);
-  --danger: #b71c1c;
-  --danger-soft: rgba(183, 28, 28, 0.1);
+  /* Semantic — status only, never reused decoratively. Muted to sit
+     comfortably in the newsprint palette rather than borrowed unchanged
+     from a UI-blue system. */
+  --success: #2f6b4a;
+  --success-soft: rgba(47, 107, 74, 0.1);
+  --warning: #96650a;
+  --warning-soft: rgba(150, 101, 10, 0.1);
+  --danger: #a12f2f;
+  --danger-soft: rgba(161, 47, 47, 0.1);
 
-  /* Spacing (4px base) */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-  --space-8: 64px;
+  /* Spacing — Broadsheet's 5px base, density 1.25×, extended to 8 steps */
+  --space-1: 5px;
+  --space-2: 10px;
+  --space-3: 15px;
+  --space-4: 20px;
+  --space-5: 25px;
+  --space-6: 30px;
+  --space-7: 40px;
+  --space-8: 50px;
 
-  /* Radius — every rounded corner in the app traces to one of these five
-     steps (layout-and-spacing.md's radius-scale rule); nothing is a
-     one-off pixel value picked by eye. */
-  --radius-xs: 6px;
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 24px;
-  --radius-xl: 28px;
+  /* Radius — Broadsheet draws crisp, minimal corners (1–4px), never a
+     pill or squircle. --radius-full stays large for genuinely circular
+     elements (dots, pips, the score ring); buttons/tags/chips reference
+     --radius-md/lg instead of --radius-full, unlike the old pill system. */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
   --radius-full: 999px;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 2px rgba(45, 43, 43, 0.14);
+  --shadow-md: 0 2px 8px rgba(45, 43, 43, 0.12);
+  --shadow-lg: 0 4px 24px rgba(45, 43, 43, 0.18);
 
-  /* One family, two roles — the actual Apple approach: SF Pro Display and
-     SF Pro Text are optical sizes of the same typeface, not different
-     families, so display and body just differ in size/weight here, not in
-     face. -apple-system/BlinkMacSystemFont render as real San Francisco on
-     macOS/iOS; Inter is the closest web fallback everywhere else. No serif
-     anywhere — one clean sans throughout. */
-  --font-display: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  /* One family — Source Serif 4 for both display and body, the true
+     italic loaded at the body weight (never a synthesized oblique).
+     Headings take the 600 weight; body stays 400. */
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "Source Serif 4", Georgia, "Times New Roman", serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* Apple-feel easing library — physics-based curves, never linear or a
@@ -91,12 +95,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  /* Hard, absolute lock — the page itself can never scroll, in either
-     direction, no matter what any descendant does. Every screen below is
-     built to fit within one viewport; this is the backstop that makes
-     "no scroll" true even if some future content doesn't fit perfectly. */
-  overflow: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -107,10 +106,7 @@ body {
 }
 
 #root {
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  justify-content: center;
+  min-height: 100dvh;
 }
 
 a {
@@ -140,15 +136,12 @@ button {
   outline-offset: 2px;
 }
 
-/* Flat surface panel — hairline border, no blur, no transparency.
-   corner-shape is progressive enhancement (Chrome 139+; falls back to a
-   plain rounded corner everywhere else — see MDN/chromestatus) that turns
-   the rounded corner into a true squircle instead of a circular arc. */
+/* Flat surface panel — hairline border, no blur, no transparency, and a
+   crisp minimal radius (Broadsheet draws no squircles). */
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  corner-shape: squircle;
 }
 
 .pill {
@@ -174,6 +167,221 @@ button {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ---------------------------------------------------------------------- */
+/* CMYK print-registration misregistration effect                          */
+/* Three color "plates" (cyan, magenta, yellow) slightly offset behind the */
+/* main "paper" text layer — multiply blend so they read through the bg.   */
+/* ---------------------------------------------------------------------- */
+
+.cmyk-head {
+  display: block;
+  position: relative;
+}
+
+.cmyk-num {
+  display: inline-block;
+  position: relative;
+}
+
+.cmyk-head .paper,
+.cmyk-num .paper {
+  position: relative;
+  z-index: 1;
+}
+
+.plate {
+  position: absolute;
+  top: 0;
+  left: 0;
+  user-select: none;
+  pointer-events: none;
+}
+
+.plate-c {
+  color: #00b4d8;
+  opacity: 0.55;
+  transform: translate(-2px, 1.5px);
+  mix-blend-mode: multiply;
+}
+
+.plate-m {
+  color: #e91e8c;
+  opacity: 0.4;
+  transform: translate(2px, -1px);
+  mix-blend-mode: multiply;
+}
+
+.plate-y {
+  color: #f5c800;
+  opacity: 0.35;
+  transform: translate(0.5px, 2px);
+  mix-blend-mode: multiply;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Fade-in entry animation                                                 */
+/* ---------------------------------------------------------------------- */
+
+.lpt-fade-in {
+  animation: lptFadeIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes lptFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Nav bar                                                                 */
+/* ---------------------------------------------------------------------- */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px clamp(20px, 5vw, 64px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-brand {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Broadsheet utility buttons                                              */
+/* ---------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 9px 18px;
+  transition: background 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo),
+    transform 150ms var(--ease-spring);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: 80ms;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  padding: 6px 0;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Tags                                                                    */
+/* ---------------------------------------------------------------------- */
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.tag-outline {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--ink-soft);
+}
+
+.tag-neutral {
+  background: var(--surface-2);
+  color: var(--ink-soft);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Card                                                                    */
+/* ---------------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: var(--space-6);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Form input                                                              */
+/* ---------------------------------------------------------------------- */
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 14px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 150ms var(--ease-out-expo);
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.input::placeholder {
+  color: var(--ink-faint);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,118 +1,94 @@
 import { useRef, useState, useEffect } from "react";
-import { CRITERIA_ORDER, CRITERIA_LABELS, CRITERIA_COLORS } from "../criteriaMeta.js";
+import { CRITERIA_ORDER, CRITERIA_LABELS } from "../criteriaMeta.js";
+import EmailGate from "./EmailGate.jsx";
 
-function ScoreBar({ percent }) {
-  return (
-    <div className="score-bar" role="img" aria-label={`${percent}%`}>
-      <div className="score-bar-fill" style={{ width: `${percent}%` }} />
-    </div>
-  );
-}
-
-function RatingPips({ value }) {
-  return (
-    <span className="rating-pips" aria-label={`${value} out of 5`}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <span key={i} className={`rating-pip ${i <= value ? "rating-pip--filled" : ""}`} />
-      ))}
-    </span>
-  );
-}
-
-export default function TeaserReport({ teardown }) {
+export default function TeaserReport({ teardown, url, title, onConfirmed }) {
   const { criteria } = teardown;
   const firstKey = CRITERIA_ORDER[0];
   const lockedKeys = CRITERIA_ORDER.slice(1);
   const first = criteria[firstKey];
-
-  const scrollRef = useRef(null);
-  const [showArrow, setShowArrow] = useState(true);
+  const teaserRef = useRef(null);
+  const [showTeaserArrow, setShowTeaserArrow] = useState(true);
 
   useEffect(() => {
-    const el = scrollRef.current;
+    const el = teaserRef.current;
     if (!el) return;
-    function check() {
-      setShowArrow(el.scrollTop + el.clientHeight < el.scrollHeight - 24);
-    }
-    check();
-    el.addEventListener("scroll", check, { passive: true });
-    return () => el.removeEventListener("scroll", check);
+    setShowTeaserArrow(el.scrollHeight > el.clientHeight + 24);
   }, []);
 
-  function scrollDown() {
-    scrollRef.current?.scrollBy({ top: 200, behavior: "smooth" });
-  }
-
   return (
-    <div className="teaser-report-wrap">
-      <div className="teaser-report" ref={scrollRef}>
-        {/* First criterion — fully visible */}
-        <div
-          className="criterion-card criterion-card--teaser panel"
-          style={{ "--criterion-color": CRITERIA_COLORS[firstKey] }}
-        >
-          <header className="criterion-card-head">
-            <span className="criterion-card-dot" />
-            <span className="criterion-card-title">{CRITERIA_LABELS[firstKey]}</span>
-          </header>
-          <ScoreBar percent={first.barPercent} />
-          <div className="criterion-findings-wrap">
-            <ul className="criterion-findings">
-              {first.findings.map((f, i) => (
-                <li key={i}>
-                  <span className="finding-index">{i + 1}</span>
-                  <p>{f.text}</p>
-                  <RatingPips value={f.rating} />
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="criterion-fix">
-            <span className="criterion-fix-label">Change this</span>
-            <p>{first.whatToChange}</p>
-          </div>
+    <div>
+      {/* First criterion — fully visible */}
+      <div className="lpt-criterion-first">
+        <div className="lpt-criterion-head">
+          <span className="lpt-criterion-num">01</span>
+          <span className="lpt-criterion-title">{CRITERIA_LABELS[firstKey]}</span>
         </div>
+        <div className="lpt-score-bar">
+          <div className="lpt-score-bar-fill" style={{ width: `${first.barPercent}%` }} />
+        </div>
+        <ul className="lpt-findings">
+          {first.findings.map((f, i) => (
+            <li key={i}>
+              <span className="lpt-finding-index">{i + 1}.</span>
+              <p className="lpt-finding-text">{f.text}</p>
+              <span className="lpt-finding-pips">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <span
+                    key={n}
+                    className="lpt-finding-pip"
+                    style={{ background: n <= f.rating ? "var(--ink)" : "var(--surface-2)" }}
+                  />
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="lpt-what-to-change">
+          <span className="lpt-what-arrow">→</span>
+          {first.whatToChange}
+        </p>
+      </div>
 
-        {/* Remaining criteria — name visible, content blurred */}
-        {lockedKeys.map((key) => {
-          const c = criteria[key];
-          return (
-            <div
-              key={key}
-              className="teaser-locked-card panel"
-              style={{ "--criterion-color": CRITERIA_COLORS[key] }}
-            >
-              <header className="criterion-card-head">
-                <span className="criterion-card-dot" />
-                <span className="criterion-card-title">{CRITERIA_LABELS[key]}</span>
-              </header>
-              <div className="teaser-locked-blur" aria-hidden="true">
-                <ScoreBar percent={c.barPercent} />
-                <ul className="criterion-findings">
+      {/* Locked criteria (blurred) + email gate card overlay */}
+      <div className="lpt-teaser">
+        <div
+          ref={teaserRef}
+          className="lpt-teaser-scroll"
+          onScroll={(e) => {
+            const el = e.target;
+            setShowTeaserArrow(el.scrollTop + el.clientHeight < el.scrollHeight - 24);
+          }}
+          aria-hidden="true"
+        >
+          {lockedKeys.map((key, idx) => {
+            const c = criteria[key];
+            return (
+              <div key={key} className="lpt-locked-criterion">
+                <div className="lpt-criterion-head">
+                  <span className="lpt-criterion-num">{String(idx + 2).padStart(2, "0")}</span>
+                  <span className="lpt-criterion-title">{CRITERIA_LABELS[key]}</span>
+                </div>
+                <div className="lpt-score-bar">
+                  <div className="lpt-score-bar-fill" style={{ width: `${c.barPercent}%` }} />
+                </div>
+                <ul className="lpt-findings">
                   {c.findings.slice(0, 2).map((f, i) => (
                     <li key={i}>
-                      <span className="finding-index">{i + 1}</span>
-                      <p>{f.text}</p>
-                      <RatingPips value={f.rating} />
+                      <span className="lpt-finding-index">{i + 1}.</span>
+                      <p className="lpt-finding-text">{f.text}</p>
                     </li>
                   ))}
                 </ul>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      <button
-        className={`teaser-scroll-arrow ${showArrow ? "" : "teaser-scroll-arrow--hidden"}`}
-        onClick={scrollDown}
-        aria-label="Scroll for more"
-        tabIndex={showArrow ? 0 : -1}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M8 3v10M3 9l5 5 5-5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
+        <div className="lpt-gate-card card">
+          <EmailGate url={url} title={title} teardown={teardown} onConfirmed={onConfirmed} />
+        </div>
+      </div>
     </div>
   );
 }

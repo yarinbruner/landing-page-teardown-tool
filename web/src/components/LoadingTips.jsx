@@ -19,11 +19,6 @@ function useRotatingIndex(length, intervalMs) {
   return index;
 }
 
-// Simulated, honest progress: decelerates toward a cap it never reaches on
-// its own — it can only ever imply "still working," never falsely claim
-// 100% before the real response actually lands (see accessibility-and-
-// polish.md's "don't fake progress" rule — the cap is what keeps this from
-// crossing into lying).
 function useSimulatedProgress(cap = 92) {
   const [percent, setPercent] = useState(4);
   useEffect(() => {
@@ -45,17 +40,15 @@ export default function LoadingTips() {
   const percent = useSimulatedProgress();
 
   return (
-    <div className="loading-state">
-      <div className="loading-panel panel">
-        <div className="loading-bar-row">
-          <div className="loading-bar">
-            <div className="loading-bar-fill" style={{ width: `${percent}%` }} />
-          </div>
-          <span className="loading-percent tabular-nums">{percent}%</span>
-        </div>
-        <p className="loading-status" key={statusIndex}>
+    <div className="lpt-loading lpt-fade-in">
+      <div className="lpt-loading-top">
+        <p className="lpt-loading-status" key={statusIndex}>
           {STATUS_LINES[statusIndex]}
         </p>
+        <span className="lpt-loading-pct">{percent}%</span>
+      </div>
+      <div className="lpt-loading-bar">
+        <div className="lpt-loading-bar-fill" style={{ width: `${percent}%` }} />
       </div>
     </div>
   );

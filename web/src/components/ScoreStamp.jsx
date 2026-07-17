@@ -10,7 +10,7 @@ const SIZES = {
   sm: { box: 40, stroke: 3 },
 };
 
-export default function ScoreStamp({ score, max = 100, size = "md" }) {
+export default function ScoreStamp({ score, max = 100, size = "lg" }) {
   const { key, word } = tier(score, max);
   const pct = Math.max(0, Math.min(100, (score / max) * 100));
   const rounded = Math.round(score);

@@ -1,16 +1,10 @@
 import { useState, useEffect } from "react";
 import ScoreHead from "./components/ScoreHead.jsx";
 import TeaserReport from "./components/TeaserReport.jsx";
-import EmailGate from "./components/EmailGate.jsx";
 import LoadingTips from "./components/LoadingTips.jsx";
-import { CRITERIA_ORDER } from "./criteriaMeta.js";
 import "./App.css";
 
-const EXAMPLES = [
-  { url: "stripe.com", color: "#7c3aed" },
-  { url: "linear.app", color: "#0f766e" },
-  { url: "notion.com", color: "#8a5a05" },
-];
+const EXAMPLES = ["stripe.com", "linear.app", "notion.com"];
 
 const TEST_MODE_STORAGE_KEY = "teardown:testMode";
 const CACHE_PREFIX = "teardown:cache:v1:";
@@ -107,151 +101,157 @@ export default function App() {
     setTeardownError(null);
   }
 
-  if (teardownPhase === "gated" && teardownResult) {
-    return (
-      <div className="page">
-        <div className="screen screen--report" key="gated">
-          <button type="button" className="back-button" onClick={backToInput}>
-            ← New teardown
-          </button>
+  const showIdleShell = teardownPhase !== "gated" && teardownPhase !== "confirmed";
 
-          <div className="report-head">
-            <div className="report-head-title">
-              {teardownResult.title}
-              {teardownResult.mock && <span className="mock-badge">Mock data</span>}
-            </div>
-            <div className="report-head-meta">
-              {teardownResult.url} · Analyzed {new Date(teardownResult.analyzedAt).toLocaleString()}
-            </div>
+  return (
+    <>
+      <nav className="nav">
+        <span className="nav-brand">Landing Page Teardown</span>
+        <span className="tag tag-outline">Free</span>
+      </nav>
+
+      <div className="lpt-container">
+
+        {/* ── Idle shell: visible in idle / loading / error / ended ─────── */}
+        {showIdleShell && (
+          <div className="lpt-fade-in">
+            <header className="lpt-hero">
+              <h1 className="lpt-headline">
+                <span className="cmyk-head">
+                  <span className="paper">Score the pitch,</span>
+                  <span className="plate plate-c" aria-hidden="true">Score the pitch,</span>
+                  <span className="plate plate-m" aria-hidden="true">Score the pitch,</span>
+                  <span className="plate plate-y" aria-hidden="true">Score the pitch,</span>
+                </span>
+                <span className="cmyk-head">
+                  <span className="paper">not just the paint.</span>
+                  <span className="plate plate-c" aria-hidden="true">not just the paint.</span>
+                  <span className="plate plate-m" aria-hidden="true">not just the paint.</span>
+                  <span className="plate plate-y" aria-hidden="true">not just the paint.</span>
+                </span>
+              </h1>
+              <p className="lpt-sub">
+                Drop in a URL. Get an industry-standard conversion teardown — message &amp; value
+                prop, call to action, trust, friction, and urgency.
+              </p>
+            </header>
+
+            {teardownPhase === "ended" && (
+              <div className="lpt-notice">
+                <span className="lpt-notice-label">Notice</span>
+                <p className="lpt-notice-text">
+                  <strong>This campaign has closed.</strong> Thank you for your interest — the teardown
+                  tool is no longer accepting new analyses.
+                </p>
+              </div>
+            )}
+
+            {teardownPhase === "loading" ? (
+              <LoadingTips />
+            ) : (
+              <>
+                <form className="lpt-form" onSubmit={handleSubmit}>
+                  <label className="lpt-form-label" htmlFor="teardown-url">URL</label>
+                  <input
+                    id="teardown-url"
+                    className="lpt-form-input"
+                    type="text"
+                    inputMode="url"
+                    autoComplete="url"
+                    placeholder="stripe.com"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    spellCheck={false}
+                    autoFocus
+                  />
+                  <button className="btn btn-primary lpt-form-btn" type="submit" aria-label="Run teardown">
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </form>
+
+                <div className="lpt-below-form">
+                  <p className="lpt-examples">
+                    Try —{" "}
+                    {EXAMPLES.map((url, i) => (
+                      <span key={url}>
+                        <button type="button" className="lpt-example-btn" onClick={() => handleExampleClick(url)}>
+                          {url}
+                        </button>
+                        {i < EXAMPLES.length - 1 && " / "}
+                      </span>
+                    ))}
+                  </p>
+                  {import.meta.env.DEV && (
+                    <label className="test-mode-row">
+                      <span className="toggle-switch">
+                        <input type="checkbox" checked={testMode} onChange={toggleTestMode} />
+                        <span className="toggle-track">
+                          <span className="toggle-thumb" />
+                        </span>
+                      </span>
+                      Demo mode — mock data, no API cost
+                    </label>
+                  )}
+                </div>
+
+                {teardownPhase === "error" && (
+                  <div className="lpt-notice" style={{ marginTop: 28 }}>
+                    <span className="lpt-notice-label lpt-notice-label--danger">
+                      Couldn't complete the teardown
+                    </span>
+                    <p className="lpt-notice-text">{teardownError}</p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
+        )}
 
-          <div className="report-grid">
+        {/* ── Report: gated phase ──────────────────────────────────────── */}
+        {teardownPhase === "gated" && teardownResult && (
+          <div className="lpt-fade-in lpt-report-grid">
             <ScoreHead
               overall={teardownResult.teardown.overall}
               overallVerdict={teardownResult.teardown.overallVerdict}
+              resultUrl={teardownResult.url}
+              analyzedAt={teardownResult.analyzedAt}
+              isMock={teardownResult.mock}
+              onBack={backToInput}
             />
-            <TeaserReport teardown={teardownResult.teardown} />
-            <EmailGate
+            <TeaserReport
+              teardown={teardownResult.teardown}
               url={teardownResult.url}
               title={teardownResult.title}
-              teardown={teardownResult.teardown}
               onConfirmed={(email) => {
                 setConfirmedEmail(email);
                 setTeardownPhase("confirmed");
               }}
             />
           </div>
-        </div>
-      </div>
-    );
-  }
+        )}
 
-  if (teardownPhase === "confirmed") {
-    return (
-      <div className="page">
-        <div className="screen screen--confirmed" key="confirmed">
-          <div className="confirmed-panel panel">
-            <div className="confirmed-icon">✉️</div>
-            <h2 className="confirmed-title">Check your inbox</h2>
-            <p className="confirmed-sub">
-              Your full teardown is on its way to <strong>{confirmedEmail}</strong>. Should arrive in seconds.
+        {/* ── Confirmed phase ──────────────────────────────────────────── */}
+        {teardownPhase === "confirmed" && (
+          <div className="lpt-fade-in lpt-confirmed">
+            <div className="lpt-confirmed-icon">
+              <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                <rect x="3" y="6" width="22" height="16" rx="2.5" stroke="currentColor" strokeWidth="1.75" />
+                <path d="M4 8l10 8 10-8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h2 className="lpt-confirmed-title">Check your inbox.</h2>
+            <p className="lpt-confirmed-sub">
+              Your full teardown is on its way to <strong>{confirmedEmail}</strong>. It should arrive in seconds.
             </p>
-            <button className="url-bar-submit" onClick={backToInput}>
+            <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={backToInput}>
               Analyze another URL →
             </button>
           </div>
-        </div>
+        )}
+
       </div>
-    );
-  }
-
-  return (
-    <div className="page">
-      <div className="screen" key="input">
-        <header className="masthead">
-          <div className="bg-dots bg-dots--lg" aria-hidden="true" />
-          <div className="bg-dots bg-dots--md" aria-hidden="true" />
-          <div className="bg-dots bg-dots--sm" aria-hidden="true" />
-          <div className="masthead-content">
-            <div className="masthead-eyebrow">Landing Page Teardown</div>
-            <h1 className="masthead-title">Score the pitch, not just the paint.</h1>
-            <p className="masthead-sub">
-              Drop in a URL. Get an industry-standard conversion teardown — message &amp; value
-              prop, call to action, trust, friction, and urgency. Free, no sign-up required.
-            </p>
-          </div>
-        </header>
-
-        {teardownPhase === "ended" && (
-          <div className="banner banner--ended panel">
-            <strong>This campaign has closed.</strong> Thank you for your interest — the teardown
-            tool is no longer accepting new analyses.
-          </div>
-        )}
-
-        {teardownPhase === "loading" ? (
-          <LoadingTips />
-        ) : (
-        <>
-        <form className="url-bar" onSubmit={handleSubmit}>
-          <label className="url-bar-prefix" htmlFor="teardown-url">
-            URL
-          </label>
-          <input
-            id="teardown-url"
-            className="url-bar-input"
-            type="text"
-            inputMode="url"
-            autoComplete="url"
-            placeholder="e.g. stripe.com"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            spellCheck={false}
-            autoFocus
-          />
-          <button className="url-bar-submit" type="submit">
-            <span className="url-bar-submit-text">Teardown</span>
-            <span className="url-bar-submit-arrow" aria-hidden="true">→</span>
-          </button>
-        </form>
-
-        <div className="below-url-row">
-          {import.meta.env.DEV && (
-            <label className="test-mode-row">
-              <span className="toggle-switch">
-                <input type="checkbox" checked={testMode} onChange={toggleTestMode} />
-                <span className="toggle-track">
-                  <span className="toggle-thumb" />
-                </span>
-              </span>
-              Demo mode (no API call)
-            </label>
-          )}
-
-          <div className="examples" style={!import.meta.env.DEV ? { marginLeft: "auto" } : {}}>
-            <span>Try:</span>
-            {EXAMPLES.map((ex) => (
-              <button
-                key={ex.url}
-                type="button"
-                className="example-chip"
-                style={{ "--chip-color": ex.color }}
-                onClick={() => handleExampleClick(ex.url)}
-              >
-                {ex.url}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {teardownPhase === "error" && (
-          <div className="banner banner--error panel">
-            <strong>Couldn't complete the teardown.</strong> {teardownError}
-          </div>
-        )}
-        </>
-        )}
-      </div>
-    </div>
+    </>
   );
 }

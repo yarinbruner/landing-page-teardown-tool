@@ -23,35 +23,44 @@ export default function EmailGate({ url, title, teardown, onConfirmed }) {
     }).catch((err) => console.warn("Lead capture failed:", err.message));
 
     if (typeof window.gtag === "function") window.gtag("event", "lead_captured", { url });
-
     onConfirmed(trimmed);
   }
 
   return (
-    <div className="email-gate panel">
-      <div className="email-gate-heading-row">
-        <span className="email-gate-lock" aria-hidden="true">🔒</span>
-        <h2 className="email-gate-title">Unlock the full teardown</h2>
+    <>
+      <div className="lpt-gate-heading">
+        <span className="lpt-gate-lock" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M5.5 7V4.75a2.5 2.5 0 0 1 5 0V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </span>
+        <span className="card-title">Unlock the full teardown</span>
       </div>
-      <p className="email-gate-sub">
+      <p className="lpt-gate-sub">
         Enter your email and we'll send the complete analysis — all 5 criteria — straight to your inbox.
       </p>
-      <form className="email-gate-form" onSubmit={handleSubmit}>
+      <form className="lpt-gate-form" onSubmit={handleSubmit}>
         <input
+          className="input"
           type="email"
-          className="email-gate-input"
           placeholder="you@company.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           disabled={submitting}
         />
-        <button type="submit" className="url-bar-submit" disabled={submitting}>
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={submitting}
+          style={{ whiteSpace: "nowrap", paddingInline: 18 }}
+        >
           {submitting ? "Sending…" : "Send my report →"}
         </button>
       </form>
-      {error && <p className="email-gate-error">{error}</p>}
-      <p className="email-gate-fine-print">No spam. Just your report, once.</p>
-    </div>
+      {error && <p className="lpt-gate-error">{error}</p>}
+      <p className="lpt-gate-fine-print">No spam. Just your report, once.</p>
+    </>
   );
 }
